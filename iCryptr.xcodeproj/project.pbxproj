@@ -15,6 +15,24 @@
 		C689E91F26CC99C700DCE7BD /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C689E8F426CC99C700DCE7BD /* ContentView.swift */; };
 		C689E92026CC99C700DCE7BD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C689E8F526CC99C700DCE7BD /* Assets.xcassets */; };
 		C689E92126CC99C700DCE7BD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C689E8F526CC99C700DCE7BD /* Assets.xcassets */; };
+		C689E93D26CC9A4F00DCE7BD /* EncryptionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C689E93A26CC9A4F00DCE7BD /* EncryptionService.swift */; };
+		C689E93E26CC9A4F00DCE7BD /* EncryptionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C689E93A26CC9A4F00DCE7BD /* EncryptionService.swift */; };
+		C689E93F26CC9A4F00DCE7BD /* StreamCryptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C689E93B26CC9A4F00DCE7BD /* StreamCryptor.swift */; };
+		C689E94026CC9A4F00DCE7BD /* StreamCryptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C689E93B26CC9A4F00DCE7BD /* StreamCryptor.swift */; };
+		C689E94126CC9A4F00DCE7BD /* HelperService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C689E93C26CC9A4F00DCE7BD /* HelperService.swift */; };
+		C689E94226CC9A4F00DCE7BD /* HelperService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C689E93C26CC9A4F00DCE7BD /* HelperService.swift */; };
+		C689E94726CC9AAD00DCE7BD /* FileEncryptionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C689E94326CC9AAD00DCE7BD /* FileEncryptionView.swift */; };
+		C689E94826CC9AAD00DCE7BD /* FileEncryptionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C689E94326CC9AAD00DCE7BD /* FileEncryptionView.swift */; };
+		C689E94926CC9AAD00DCE7BD /* DocumentPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C689E94426CC9AAD00DCE7BD /* DocumentPickerView.swift */; };
+		C689E94A26CC9AAD00DCE7BD /* DocumentPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C689E94426CC9AAD00DCE7BD /* DocumentPickerView.swift */; };
+		C689E94B26CC9AAD00DCE7BD /* EncryptActionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C689E94526CC9AAD00DCE7BD /* EncryptActionView.swift */; };
+		C689E94C26CC9AAD00DCE7BD /* EncryptActionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C689E94526CC9AAD00DCE7BD /* EncryptActionView.swift */; };
+		C689E94D26CC9AAD00DCE7BD /* ImagePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C689E94626CC9AAD00DCE7BD /* ImagePickerView.swift */; };
+		C689E94E26CC9AAD00DCE7BD /* ImagePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C689E94626CC9AAD00DCE7BD /* ImagePickerView.swift */; };
+		C6EC5F6D26D2F4C100244A3D /* FileStreamService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6EC5F6C26D2F4C100244A3D /* FileStreamService.swift */; };
+		C6EC5F6E26D2F4C100244A3D /* FileStreamService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6EC5F6C26D2F4C100244A3D /* FileStreamService.swift */; };
+		C6EC5F7726D30A0700244A3D /* FileEncryptionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6EC5F7626D30A0700244A3D /* FileEncryptionController.swift */; };
+		C6EC5F7826D30A0700244A3D /* FileEncryptionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6EC5F7626D30A0700244A3D /* FileEncryptionController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,6 +67,15 @@
 		C689E91526CC99C700DCE7BD /* Tests macOS.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Tests macOS.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C689E91926CC99C700DCE7BD /* Tests_macOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests_macOS.swift; sourceTree = "<group>"; };
 		C689E91B26CC99C700DCE7BD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		C689E93A26CC9A4F00DCE7BD /* EncryptionService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EncryptionService.swift; sourceTree = "<group>"; };
+		C689E93B26CC9A4F00DCE7BD /* StreamCryptor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StreamCryptor.swift; sourceTree = "<group>"; };
+		C689E93C26CC9A4F00DCE7BD /* HelperService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HelperService.swift; sourceTree = "<group>"; };
+		C689E94326CC9AAD00DCE7BD /* FileEncryptionView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileEncryptionView.swift; sourceTree = "<group>"; };
+		C689E94426CC9AAD00DCE7BD /* DocumentPickerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DocumentPickerView.swift; sourceTree = "<group>"; };
+		C689E94526CC9AAD00DCE7BD /* EncryptActionView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EncryptActionView.swift; sourceTree = "<group>"; };
+		C689E94626CC9AAD00DCE7BD /* ImagePickerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImagePickerView.swift; sourceTree = "<group>"; };
+		C6EC5F6C26D2F4C100244A3D /* FileStreamService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileStreamService.swift; sourceTree = "<group>"; };
+		C6EC5F7626D30A0700244A3D /* FileEncryptionController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileEncryptionController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -98,8 +125,10 @@
 		C689E8F226CC99C700DCE7BD /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				C6EC5F7526D307A800244A3D /* Controller */,
+				C689E94F26CC9ABD00DCE7BD /* Views */,
+				C689E93026CC9A0D00DCE7BD /* Services */,
 				C689E8F326CC99C700DCE7BD /* iCryptrApp.swift */,
-				C689E8F426CC99C700DCE7BD /* ContentView.swift */,
 				C689E8F526CC99C700DCE7BD /* Assets.xcassets */,
 			);
 			path = Shared;
@@ -149,6 +178,37 @@
 				C689E91B26CC99C700DCE7BD /* Info.plist */,
 			);
 			path = "Tests macOS";
+			sourceTree = "<group>";
+		};
+		C689E93026CC9A0D00DCE7BD /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				C689E93A26CC9A4F00DCE7BD /* EncryptionService.swift */,
+				C689E93C26CC9A4F00DCE7BD /* HelperService.swift */,
+				C689E93B26CC9A4F00DCE7BD /* StreamCryptor.swift */,
+				C6EC5F6C26D2F4C100244A3D /* FileStreamService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		C689E94F26CC9ABD00DCE7BD /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				C689E8F426CC99C700DCE7BD /* ContentView.swift */,
+				C689E94426CC9AAD00DCE7BD /* DocumentPickerView.swift */,
+				C689E94526CC9AAD00DCE7BD /* EncryptActionView.swift */,
+				C689E94326CC9AAD00DCE7BD /* FileEncryptionView.swift */,
+				C689E94626CC9AAD00DCE7BD /* ImagePickerView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		C6EC5F7526D307A800244A3D /* Controller */ = {
+			isa = PBXGroup;
+			children = (
+				C6EC5F7626D30A0700244A3D /* FileEncryptionController.swift */,
+			);
+			path = Controller;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -308,8 +368,17 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C689E94B26CC9AAD00DCE7BD /* EncryptActionView.swift in Sources */,
 				C689E91E26CC99C700DCE7BD /* ContentView.swift in Sources */,
+				C689E94126CC9A4F00DCE7BD /* HelperService.swift in Sources */,
+				C689E93F26CC9A4F00DCE7BD /* StreamCryptor.swift in Sources */,
+				C689E94D26CC9AAD00DCE7BD /* ImagePickerView.swift in Sources */,
+				C6EC5F7726D30A0700244A3D /* FileEncryptionController.swift in Sources */,
 				C689E91C26CC99C700DCE7BD /* iCryptrApp.swift in Sources */,
+				C689E94926CC9AAD00DCE7BD /* DocumentPickerView.swift in Sources */,
+				C689E93D26CC9A4F00DCE7BD /* EncryptionService.swift in Sources */,
+				C689E94726CC9AAD00DCE7BD /* FileEncryptionView.swift in Sources */,
+				C6EC5F6D26D2F4C100244A3D /* FileStreamService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -317,8 +386,17 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C689E94C26CC9AAD00DCE7BD /* EncryptActionView.swift in Sources */,
 				C689E91F26CC99C700DCE7BD /* ContentView.swift in Sources */,
+				C689E94226CC9A4F00DCE7BD /* HelperService.swift in Sources */,
+				C689E94026CC9A4F00DCE7BD /* StreamCryptor.swift in Sources */,
+				C689E94E26CC9AAD00DCE7BD /* ImagePickerView.swift in Sources */,
+				C6EC5F7826D30A0700244A3D /* FileEncryptionController.swift in Sources */,
 				C689E91D26CC99C700DCE7BD /* iCryptrApp.swift in Sources */,
+				C689E94A26CC9AAD00DCE7BD /* DocumentPickerView.swift in Sources */,
+				C689E93E26CC9A4F00DCE7BD /* EncryptionService.swift in Sources */,
+				C689E94826CC9AAD00DCE7BD /* FileEncryptionView.swift in Sources */,
+				C6EC5F6E26D2F4C100244A3D /* FileStreamService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
