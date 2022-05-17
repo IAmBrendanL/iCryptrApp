@@ -29,6 +29,13 @@
 		C689E94C26CC9AAD00DCE7BD /* EncryptActionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C689E94526CC9AAD00DCE7BD /* EncryptActionView.swift */; };
 		C689E94D26CC9AAD00DCE7BD /* ImagePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C689E94626CC9AAD00DCE7BD /* ImagePickerView.swift */; };
 		C689E94E26CC9AAD00DCE7BD /* ImagePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C689E94626CC9AAD00DCE7BD /* ImagePickerView.swift */; };
+		C6D398B3281DDFFA00384F8E /* test.txt in Resources */ = {isa = PBXBuildFile; fileRef = C6D398B2281DDFFA00384F8E /* test.txt */; };
+		C6D398B4281DE0C800384F8E /* FileStreamService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6EC5F6C26D2F4C100244A3D /* FileStreamService.swift */; };
+		C6D398B5281DE0D100384F8E /* HelperService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C689E93C26CC9A4F00DCE7BD /* HelperService.swift */; };
+		C6D398B6281DE0D100384F8E /* StreamCryptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C689E93B26CC9A4F00DCE7BD /* StreamCryptor.swift */; };
+		C6D398B7281DE0D400384F8E /* EncryptionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C689E93A26CC9A4F00DCE7BD /* EncryptionService.swift */; };
+		C6D398B9281E5F6D00384F8E /* Extentions.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6D398B8281E5F6D00384F8E /* Extentions.swift */; };
+		C6D398BA281E5F6D00384F8E /* Extentions.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6D398B8281E5F6D00384F8E /* Extentions.swift */; };
 		C6EC5F6D26D2F4C100244A3D /* FileStreamService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6EC5F6C26D2F4C100244A3D /* FileStreamService.swift */; };
 		C6EC5F6E26D2F4C100244A3D /* FileStreamService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6EC5F6C26D2F4C100244A3D /* FileStreamService.swift */; };
 		C6EC5F7726D30A0700244A3D /* FileEncryptionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6EC5F7626D30A0700244A3D /* FileEncryptionController.swift */; };
@@ -74,6 +81,8 @@
 		C689E94426CC9AAD00DCE7BD /* DocumentPickerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DocumentPickerView.swift; sourceTree = "<group>"; };
 		C689E94526CC9AAD00DCE7BD /* EncryptActionView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EncryptActionView.swift; sourceTree = "<group>"; };
 		C689E94626CC9AAD00DCE7BD /* ImagePickerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImagePickerView.swift; sourceTree = "<group>"; };
+		C6D398B2281DDFFA00384F8E /* test.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = test.txt; sourceTree = "<group>"; };
+		C6D398B8281E5F6D00384F8E /* Extentions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extentions.swift; sourceTree = "<group>"; };
 		C6EC5F6C26D2F4C100244A3D /* FileStreamService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileStreamService.swift; sourceTree = "<group>"; };
 		C6EC5F7626D30A0700244A3D /* FileEncryptionController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileEncryptionController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -167,6 +176,7 @@
 			children = (
 				C689E90E26CC99C700DCE7BD /* Tests_iOS.swift */,
 				C689E91026CC99C700DCE7BD /* Info.plist */,
+				C6D398B2281DDFFA00384F8E /* test.txt */,
 			);
 			path = "Tests iOS";
 			sourceTree = "<group>";
@@ -187,6 +197,7 @@
 				C689E93C26CC9A4F00DCE7BD /* HelperService.swift */,
 				C689E93B26CC9A4F00DCE7BD /* StreamCryptor.swift */,
 				C6EC5F6C26D2F4C100244A3D /* FileStreamService.swift */,
+				C6D398B8281E5F6D00384F8E /* Extentions.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -291,7 +302,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1250;
-				LastUpgradeCheck = 1250;
+				LastUpgradeCheck = 1300;
 				TargetAttributes = {
 					C689E8F926CC99C700DCE7BD = {
 						CreatedOnToolsVersion = 12.5.1;
@@ -351,6 +362,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C6D398B3281DDFFA00384F8E /* test.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -376,6 +388,7 @@
 				C6EC5F7726D30A0700244A3D /* FileEncryptionController.swift in Sources */,
 				C689E91C26CC99C700DCE7BD /* iCryptrApp.swift in Sources */,
 				C689E94926CC9AAD00DCE7BD /* DocumentPickerView.swift in Sources */,
+				C6D398B9281E5F6D00384F8E /* Extentions.swift in Sources */,
 				C689E93D26CC9A4F00DCE7BD /* EncryptionService.swift in Sources */,
 				C689E94726CC9AAD00DCE7BD /* FileEncryptionView.swift in Sources */,
 				C6EC5F6D26D2F4C100244A3D /* FileStreamService.swift in Sources */,
@@ -404,7 +417,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C6D398B7281DE0D400384F8E /* EncryptionService.swift in Sources */,
 				C689E90F26CC99C700DCE7BD /* Tests_iOS.swift in Sources */,
+				C6D398BA281E5F6D00384F8E /* Extentions.swift in Sources */,
+				C6D398B6281DE0D100384F8E /* StreamCryptor.swift in Sources */,
+				C6D398B5281DE0D100384F8E /* HelperService.swift in Sources */,
+				C6D398B4281DE0C800384F8E /* FileStreamService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -557,7 +575,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.brendanlindsey.iCryptr.iCryptr;
+				PRODUCT_BUNDLE_IDENTIFIER = com.brendanlindsey.iCryptr;
 				PRODUCT_NAME = iCryptr;
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 5.0;
@@ -579,7 +597,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.brendanlindsey.iCryptr.iCryptr;
+				PRODUCT_BUNDLE_IDENTIFIER = com.brendanlindsey.iCryptr;
 				PRODUCT_NAME = iCryptr;
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 5.0;
@@ -594,6 +612,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = macOS/macOS.entitlements;
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = Y6FW7TXMBT;
@@ -618,6 +637,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = macOS/macOS.entitlements;
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = Y6FW7TXMBT;

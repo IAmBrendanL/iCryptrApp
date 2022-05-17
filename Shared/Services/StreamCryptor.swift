@@ -32,8 +32,8 @@ class StreamCryptor {
      */
     
     fileprivate var status: CCCryptorStatus
-    fileprivate let cryptorRef = UnsafeMutablePointer<CCCryptorRef?>.allocate(capacity: 1)
-    fileprivate var buffer = Data()
+    private let cryptorRef = UnsafeMutablePointer<CCCryptorRef?>.allocate(capacity: 1)
+    private var buffer = Data()
     
     /// Takes initializes an encryption or decryption operation.
     /// - Parameters:
@@ -73,12 +73,12 @@ class StreamCryptor {
 
 /// Wraps the StreamCryptor using swift primatives
 class SwiftStreamCryptor {
-    fileprivate let cryptrData: Data
-    fileprivate let operation: CCOperation
-    fileprivate let cryptr: StreamCryptor
+    private let operation: CCOperation
+    private let cryptr: StreamCryptor
+    private let fileLocation: URL
     
-    public init(inData: Data, forOperation: CCOperation, withKey key: Data, andIV iv: Data) {
-        cryptrData = inData
+    public init(fileLoc: URL, forOperation: CCOperation, withKey key: Data, andIV iv: Data) {
+        fileLocation = fileLoc
         operation = forOperation
         cryptr = {
             key.withUnsafeBytes { keyPtr in
@@ -89,10 +89,39 @@ class SwiftStreamCryptor {
             }
         }()
     }
-        
+    
+    /// Encrypt or Decrypt the file given to the stream cryptor and output to the given location
+    /// - Parameter outputLocation: The location to write the file to
+    public func cryptFile(outputLocation: URL) {
+        guard let inStream = InputStream(url: fileLocation) else {
+            print("Couldn't open input stream at: \(fileLocation)")
+            return
+        }
+        guard let outStream = OutputStream(url: outputLocation, append: true) else {
+            print("Couldn't open output stream at: \(fileLocation)")
+            return
+        }
+        defer {
+            inStream.close()
+            outStream.close()
+        }
+        let buf = UnsafeMutablePointer<UnsafeMutablePointer<UInt8>>.allocate(capacity: 524288008)
+        while inStream.hasBytesAvailable {
+            let len = inStream.read(buf, maxLength: 52428800)
+            if len > 0 {
+                let cypherText = self.update(with: Data(bytes: buf, count: len))
+                // TODO Handle gracefully
+                try! outStream.write(cypherText)
+            } else if len == 0 {
+                let cypherText = self.final()
+                // TODO Handle gracefully
+                try! outStream.write(cypherText)
+            }
+        }
+    }
     
     public func update(with data: Data) -> Data {
-        var outData = Data(count: kCCKeySizeAES256)
+        var outData = Data(count: data.count)
         let outDataCount = outData.count
         var numBytesUpdated = 0
         data.withUnsafeBytes { dataPtr in
@@ -100,7 +129,8 @@ class SwiftStreamCryptor {
                 cryptr.update(inPtr: dataPtr, inDataLen: data.count, outPtr: outDataPtr.baseAddress!, outBufSpace: outDataCount, outDataSize: &numBytesUpdated )
             }
         }
-        return outData
+        print("Cryptor status: \(cryptr.status == kCCSuccess ? "Good" : "\(cryptr.status)") \(numBytesUpdated)")
+        return Data(outData[..<numBytesUpdated])
     }
     
     public func final() -> Data {
@@ -110,8 +140,8 @@ class SwiftStreamCryptor {
         outData.withUnsafeMutableBytes { outDataPtr in
             cryptr.final(outPtr: outDataPtr, outBufSize: outDataCount, amountBufFilled: &numBytesUpdated)
         }
-        outData.count = numBytesUpdated 
-        return outData
+        print("Cryptor status at completion: \(cryptr.status == kCCSuccess ? "Good" : "\(cryptr.status)") \(numBytesUpdated)")
+        return Data(outData[..<numBytesUpdated])
     }
     
 }
