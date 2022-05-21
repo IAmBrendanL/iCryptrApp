@@ -18,7 +18,7 @@ import CommonCrypto
     - rounds: A UInt32 signifying the number of rounds to run the key derivation algorithm. Use getKeyGenerationRounds
               to generate or get it from a file to decrypt.
  */
-fileprivate func generateKeyFromPassword(_ passwd: String, _ salt: Data, _ rounds: UInt32) -> Data? {
+func generateKeyFromPassword(_ passwd: String, _ salt: Data, _ rounds: UInt32) -> Data? {
     var key = Data(count:kCCKeySizeAES256)
     guard let saltString = String(data: salt, encoding: .ascii) else {return nil}
     let success = key.withUnsafeMutableBytes { keyPtr in
@@ -43,7 +43,7 @@ fileprivate func generateKeyFromPassword(_ passwd: String, _ salt: Data, _ round
     - passwd: The password from the user.
     - salt: A salt generated or from a file to decrypt.
  */
-fileprivate func getKeyGenerationRounds(_ passwd: String, _ salt: Data) -> UInt32 {
+func getKeyGenerationRounds(_ passwd: String, _ salt: Data) -> UInt32 {
     guard let saltString = String(data: salt, encoding: .ascii) else {return 9999}
     return CCCalibratePBKDF(CCPBKDFAlgorithm(kCCPBKDF2), strlen(passwd), strlen(saltString),
                             CCPseudoRandomAlgorithm(kCCPRFHmacAlgSHA256), kCCKeySizeAES256, 500)
@@ -53,7 +53,7 @@ fileprivate func getKeyGenerationRounds(_ passwd: String, _ salt: Data) -> UInt3
 /**
  Generates an 8 byte cryptographically secure random salt.
  */
-fileprivate func generateSaltForKeyGeneration() -> Data? {
+func generateSaltForKeyGeneration() -> Data? {
     let uint8Pointer = UnsafeMutablePointer<UInt8>.allocate(capacity: 64)
     let result = SecRandomCopyBytes(kSecRandomDefault, 64, uint8Pointer)
     
@@ -73,7 +73,7 @@ fileprivate func generateSaltForKeyGeneration() -> Data? {
 /**
  Generates a cryptograpically secure random intitialization vector
  */
-fileprivate func generateIVForFileEncryption() -> Data? {
+func generateIVForFileEncryption() -> Data? {
     let uint8Pointer = UnsafeMutablePointer<UInt8>.allocate(capacity: kCCBlockSizeAES128)
     
     let result = SecRandomCopyBytes(kSecRandomDefault, kCCBlockSizeAES128, uint8Pointer)

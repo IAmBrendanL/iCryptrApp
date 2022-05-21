@@ -16,9 +16,11 @@ struct FileEncryptionView: View {
     @State private var fileURL: URL?
     @State private var fileEncryptionResultStatus: Bool = false
     @State private var filename = ""
+    @Binding var presentSelf: Bool
     
     
-    init(encryptionMode: HelperService.EncryptionMode, fileURL: URL) {
+    init(encryptionMode: HelperService.EncryptionMode, fileURL: URL?, presentSelf: Binding<Bool>) {
+        self._presentSelf = presentSelf
         self.encryptionMode = encryptionMode
         self.fileURL = fileURL
         if let unwrappedFileURL = self.fileURL {
@@ -35,9 +37,22 @@ struct FileEncryptionView: View {
         }
         showingAlert = true
     }
+    
+    func dismissSelf() {
+        presentSelf = false
+    }
 
     var body: some View {
         VStack {
+            HStack {
+                Spacer()
+                Button(action: dismissSelf) {
+                    Text("Cancel")
+                        .padding()
+                        .foregroundColor(Color.red)
+                }
+            }
+            Spacer()
             Text(filename).font(.title)
             SecureField("Password", text: $password).background(Color.white)
                 .cornerRadius(3)
@@ -50,7 +65,9 @@ struct FileEncryptionView: View {
                     .background(Color.blue)
                     .cornerRadius(10.0)
                 })
-        }.background(Color.gray)
+            Spacer()
+        }
+        .background(Color.gray)
         .alert(isPresented: $showingAlert) {
             Alert(title: Text("Important message"),
                   message: Text("\(self.encryptionMode == HelperService.EncryptionMode.encrypt ? "Encryption" : "Decryption") \(self.fileEncryptionResultStatus ? "Succeded" : "Failed")"),
@@ -59,9 +76,9 @@ struct FileEncryptionView: View {
     }
 }
 
-//struct FileEncryptionView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        FileEncryptionView(encryptionMode: .decrypt, fileURL: nil)
-//            .previewLayout(.sizeThatFits)
-//    }
-//}
+struct FileEncryptionView_Previews: PreviewProvider {
+    static var previews: some View {
+        FileEncryptionView(encryptionMode: .decrypt, fileURL: URL(fileURLWithPath: "/"), presentSelf: .constant(true))
+            .previewLayout(.sizeThatFits)
+    }
+}
