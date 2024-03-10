@@ -9,21 +9,20 @@
 import SwiftUI
 
 struct EncryptActionView: View {
-//    @Binding var fileURL: URL?
+    @Binding var fileURL: URL?
     var body: some View {
         VStack {
-//            Image(<#T##cgImage: CGImage##CGImage#>, scale: <#T##CGFloat#>, label: <#T##Text#>)
             Button(action: {print("asdfas")}) {
                 Text("Button")
             }
-            Text("Placeholder")
+            Text("Encrypt \(fileURL?.lastPathComponent ?? "File") ")
         }
     }
 }
 
-struct SwiftUIView_Previews: PreviewProvider {
-    static var previews: some View {
-        EncryptActionView()
-        .previewLayout(.sizeThatFits)
-    }
-}
+//struct SwiftUIView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        EncryptActionView(nil)
+//        .previewLayout(.sizeThatFits)
+//    }
+//}

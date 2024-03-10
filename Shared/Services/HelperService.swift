@@ -17,7 +17,7 @@ struct HelperService {
         case decrypt
     }
     
-    /// Get a thumnail for a file
+    /// Get a thumbnail for a file
     /// - Parameters:
     ///   - fileURL: The URL of the file for which you want to create a thumbnail.
     ///   - size: The desired size of the thumbnails.

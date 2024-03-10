@@ -16,11 +16,12 @@ struct FileEncryptionView: View {
     @State private var fileURL: URL?
     @State private var fileEncryptionResultStatus: Bool = false
     @State private var filename = ""
-    @Binding var presentSelf: Bool
+//    @Binding var presentSelf: Bool
     
     
-    init(encryptionMode: HelperService.EncryptionMode, fileURL: URL?, presentSelf: Binding<Bool>) {
-        self._presentSelf = presentSelf
+    init(encryptionMode: HelperService.EncryptionMode, fileURL: URL?, presentSelf: Binding<Bool>?) {
+//        self._presentSelf = true
+//        self._presentSelf = presentSelf
         self.encryptionMode = encryptionMode
         self.fileURL = fileURL
         if let unwrappedFileURL = self.fileURL {
@@ -39,7 +40,7 @@ struct FileEncryptionView: View {
     }
     
     func dismissSelf() {
-        presentSelf = false
+//        presentSelf = false
     }
 
     var body: some View {

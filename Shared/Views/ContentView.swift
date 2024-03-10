@@ -7,101 +7,92 @@
 
 import SwiftUI
 import UIKit
-
-enum CurrentSheet {
-    case image, document, crypt, none
-}
-
-//struct ContentViewModel {
-//    var currentSheet: CurrentSheet = .none
-//    var encryptionMode: HelperService.EncryptionMode? = nil
-//}
+import UniformTypeIdentifiers
+import PhotosUI
 
 struct ContentView: View {
-    @State var pickedImage: URL?
-    @State var pickedDocument: UIDocument?
-    @State var currentSheet: CurrentSheet? = nil
-    @State var encryptionMode: HelperService.EncryptionMode? = nil
-//    @State var contentViewState: ContentViewModel? = nil
+    @State var pickedURL: URL?
+    @State var pickedPhoto: PhotosPickerItem?
+    @State var fileTypes: [UTType] = []
+    @State var presentPhotoImporter = false
+    @State var presentFileImporter = false
     
-    func updateSheetState(sheet: CurrentSheet, mode: HelperService.EncryptionMode) -> Void {
-        encryptionMode = mode
-        print(sheet, mode)
-        currentSheet = sheet
-    }
     
-    func showSheetOnDismiss() {
-        if [.document, .image].contains(currentSheet) && (pickedImage != nil || pickedDocument != nil) {
-            currentSheet = .crypt
-        } else {
-            currentSheet =  nil
-            pickedImage = nil
-            pickedDocument = nil
+    func fileImporterOnCompletion(result: Result<URL, Error>) {
+        if case .success(let url) = result {
+            pickedURL = url
+            print("pickedURL: \(pickedURL!)")
         }
     }
     
-
+    func handleButtonPress(for action: HelperService.EncryptionMode) {
+        if action == .encrypt {
+            fileTypes = [.data]
+        } else {
+            let iCryptrFileType = UTType(filenameExtension: "icryptr") ?? UTType.data
+            fileTypes = [iCryptrFileType]
+        }
+        presentFileImporter = true
+    }
+    
     var body: some View {
-        NavigationView {
+        NavigationStack{
             ZStack {
-//                Color.gray
-//                .edgesIgnoringSafeArea(.all)
+                Color.gray
+                    .edgesIgnoringSafeArea(.all)
                 VStack {
-                    Button(action: {updateSheetState(sheet: .image, mode: .encrypt)}) {
+                    PhotosPicker(selection: $pickedPhoto, label: {
                         Text("Encrypt Photo")
                             .foregroundColor(Color.white)
                             .font(.largeTitle)
                             .padding()
                             .background(Color.blue)
                             .cornerRadius(10.0)
-                    }
+                    })
                     Spacer().frame(height: 20.0)
-                    Button(action: {updateSheetState(sheet: .document, mode: .encrypt)}) {
-                         Text("  Encrypt File  ")
-                             .foregroundColor(Color.white)
-                             .font(.largeTitle)
-                             .padding()
-                             .background(Color.blue)
-                             .cornerRadius(10.0)
-                    }
+                    Button(action: {() -> () in handleButtonPress(for: .encrypt)}, label: {
+                        Text("  Encrypt File  ")
+                            .foregroundColor(Color.white)
+                            .font(.largeTitle)
+                            .padding()
+                            .background(Color.blue)
+                            .cornerRadius(10.0)
+                        }
+                    )
                     Spacer().frame(height: 20.0)
-                    Button(action: {updateSheetState(sheet: .document, mode: .decrypt)}) {
+                    Button(action: {() -> () in handleButtonPress(for: .decrypt)}, label: {
                         Text(" Decrypt File  ")
                             .foregroundColor(Color.white)
                             .font(.largeTitle)
                             .padding()
                             .background(Color.green)
                             .cornerRadius(10.0)
-                    }
+                        }
+                    )
                 }
-                .navigationBarTitle("iCryptr").foregroundColor(Color.white)
-//                .sheet(isPresented: self.$contentViewState.showSheet, onDismiss: self.showSheetOnDismiss) {
-//                    if contentViewState.currentSheet == .crypt {
-//                        let fileURL = $pickedDocument.wrappedValue?.fileURL
-//                        FileEncryptionView(encryptionMode: self.contentViewState.encryptionMode!, fileURL: fileURL, presentSelf: $contentViewState.showSheet)
-//                    } else if let fileURL = $pickedImage.wrappedValue {
-//                        FileEncryptionView(encryptionMode: self.contentViewState.encryptionMode!, fileURL: fileURL, presentSelf: $contentViewState.showSheet)
-//                    } else if contentViewState.currentSheet == .image {
-//                        ImagePicker(image: $pickedImage)
-//                    } else if contentViewState.currentSheet == .document {
-//                        DocumentPicker(encryptionMode: self.contentViewState.encryptionMode)
-//                    }
-//                }
-                .sheet(item: self.$currentSheet, onDismiss: self.showSheetOnDismiss) { sheet in
-                    if sheet == .crypt {
-                        let fileURL = $pickedDocument.wrappedValue?.fileURL
-                        FileEncryptionView(encryptionMode: encryptionMode!, fileURL: fileURL, presentSelf: true)
-                    } else if let fileURL = $pickedImage.wrappedValue {
-                        FileEncryptionView(encryptionMode: encryptionMode!, fileURL: fileURL, presentSelf: true)
-                    } else if sheet == .image {
-                        ImagePicker(image: $pickedImage)
-                    } else if sheet == .document {
-                        DocumentPicker(encryptionMode: encryptionMode)
+                .onChange(of: pickedPhoto) {
+                    print(pickedPhoto)
+                }
+                .onChange(of: pickedURL) {
+                    print(pickedURL)
+                }
+                .fileImporter(isPresented: $presentFileImporter, allowedContentTypes: fileTypes, onCompletion: fileImporterOnCompletion)
+                .sheet(isPresented: $presentPhotoImporter) {
+                }
+                .toolbar {
+                    Button(action: {() -> () in print("sfsds")}){ Text("?") .foregroundColor(Color.black)
+                            .font(.title)
+                            .padding(10)
+                            .background(
+                                Circle().stroke(.black, lineWidth: 2)
+                                    .background(Color.white).cornerRadius(20)
+                                    .opacity(0.5)
+                            )
                     }
                 }
             }
+            .navigationTitle("iCryptr")
         }
-        .environment(\.horizontalSizeClass, .compact)
     }
 }
 
