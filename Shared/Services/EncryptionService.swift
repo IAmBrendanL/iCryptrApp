@@ -60,7 +60,7 @@ func generateSaltForKeyGeneration() -> Data? {
     // if successful
     if result == errSecSuccess {
         let salt = Data(bytes:uint8Pointer, count: 64)
-        // free memory amd return
+        // free memory and return
         uint8Pointer.deinitialize(count: 64)
         uint8Pointer.deallocate()
         return salt

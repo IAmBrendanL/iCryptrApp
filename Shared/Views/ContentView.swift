@@ -14,9 +14,9 @@ struct ContentView: View {
     @State var pickedURL: URL?
     @State var pickedPhoto: PhotosPickerItem?
     @State var fileTypes: [UTType] = []
-    @State var presentPhotoImporter = false
     @State var presentFileImporter = false
-    
+    @State var presentEncryptionView = false
+    @State private var navPath = NavigationPath()
     
     func fileImporterOnCompletion(result: Result<URL, Error>) {
         if case .success(let url) = result {
@@ -25,7 +25,7 @@ struct ContentView: View {
         }
     }
     
-    func handleButtonPress(for action: HelperService.EncryptionMode) {
+    func handleButtonPress(for action: EncryptionMode) {
         if action == .encrypt {
             fileTypes = [.data]
         } else {
@@ -36,7 +36,7 @@ struct ContentView: View {
     }
     
     var body: some View {
-        NavigationStack{
+        NavigationStack {
             ZStack {
                 Color.gray
                     .edgesIgnoringSafeArea(.all)
@@ -71,16 +71,20 @@ struct ContentView: View {
                     )
                 }
                 .onChange(of: pickedPhoto) {
-                    print(pickedPhoto)
+                    if pickedPhoto != nil {
+                        pickedURL = nil // shouldn't be necessary
+                        presentEncryptionView = true
+                    }
                 }
                 .onChange(of: pickedURL) {
-                    print(pickedURL)
+                    if pickedURL != nil {
+                        pickedPhoto = nil // shouldn't be necessary
+                        presentEncryptionView = true
+                    }
                 }
                 .fileImporter(isPresented: $presentFileImporter, allowedContentTypes: fileTypes, onCompletion: fileImporterOnCompletion)
-                .sheet(isPresented: $presentPhotoImporter) {
-                }
                 .toolbar {
-                    Button(action: {() -> () in print("sfsds")}){ Text("?") .foregroundColor(Color.black)
+                    Button(action: {() -> () in print("NOT YET IMPLEMENTED")}){ Text("?") .foregroundColor(Color.black)
                             .font(.title)
                             .padding(10)
                             .background(
@@ -90,6 +94,9 @@ struct ContentView: View {
                             )
                     }
                 }
+            }
+            .navigationDestination(isPresented: $presentEncryptionView) {
+                EncryptActionView(fileURL: $pickedURL, pickedPhoto: $pickedPhoto)
             }
             .navigationTitle("iCryptr")
         }
