@@ -31,6 +31,9 @@ struct EncryptActionView: View {
     @State private var encryptionVerifyPassword: String = ""
     @State private var newFileName: String = ""
     @State private var encryptionStatus: EncryptionProgress = .notStarted
+    @State private var fileNameError: String? = nil
+    @State private var passwordError: String? = nil
+    @State private var verifyError: String? = nil
     @FocusState private var focusedField: FocusableField?
     
     var fileName: String {
@@ -67,6 +70,14 @@ struct EncryptActionView: View {
     func handleButtonPress() {
         // dismiss keyboard
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        // validate requirements first
+        validateFileName()
+        validatePasswordRequirements()
+        validateVerifyPasswordRequirements()
+        if fileNameError != nil || passwordError != nil || verifyError != nil {
+            // TODO: Show an alert with at least one of the error messages and or make the button default to greyed out _unless_ all conditions are met
+            return
+        }
         encryptionStatus = .inProgress
         print("In progress")
         Task(priority: .userInitiated) {
@@ -77,32 +88,32 @@ struct EncryptActionView: View {
                      let success = cryptor!.cryptFile(newName: encryptionMode == .encrypt ? newFileName : nil)
                      print(success ? "Succeeded encrypting" : "Failed encrypting")
                  }
-                /* In-Memory Implementation */
-                /*
-                if encryptionMode == .encrypt  {
-                    let success = encryptFile(unwrappedFileURL, encryptionPassword, newFileName)
-                    print(success ? "Succeeded encrypting" : "Failed encrypting")
-                } else {
-                    let success = decryptFile(unwrappedFileURL, encryptionPassword)
-                    print(success ? "Succeeded decrypting" : "Failed decrypting")
-                }
-                 */
             }
             encryptionStatus = .completed
         }
     }
     
-    func validateFileName() -> Bool {
+    /// Validates that the file name matches the rules and sets any required error messages
+    func validateFileName() {
+        // allow letters, numbers, underscore, & hyphens to make up the file name
         let fileNameRegex = "^[a-zA-Z0-9_-]{1,}$"
         let fileNamePredicate = NSPredicate(format: "SELF MATCHES %@", fileNameRegex)
-        return fileNamePredicate.evaluate(with: newFileName)
+        fileNameError = fileNamePredicate.evaluate(with: newFileName) ? nil : "File name not valid"
+        // TODO: Allow file names to have spaces but only if they're not the only, first, or last character
     }
     
-    func validatePasswordRequirements() -> Bool {
+    /// Validates the password requirements and sets any required error messages
+    func validatePasswordRequirements() {
         // The password must contain at least one uppercase letter, one lowercase letter, one number, and be at least 8 characters long
         let passwordRegex = "^(?=.*[A-Z])(?=.*[0-9])(?=.*[a-z]).{8,}$"
         let passwordPredicate = NSPredicate(format: "SELF MATCHES %@", passwordRegex)
-        return passwordPredicate.evaluate(with: encryptionPassword)
+        passwordError = passwordPredicate.evaluate(with: encryptionPassword) ? nil : "The password must contain at least one uppercase letter, one lowercase letter, one number, and be at least 8 characters long"
+    }
+    
+    /// Validates the verification password requirements and sets any required error messages
+    func validateVerifyPasswordRequirements() {
+        verifyError = encryptionVerifyPassword == encryptionPassword ? nil : "Passwords must match"
+        verifyError = encryptionPassword.count > 1 ? verifyError : "Cannot be blank"
     }
     
     var body: some View {
@@ -119,7 +130,6 @@ struct EncryptActionView: View {
                         .font(.title)
                         .foregroundColor(Color.white)
                     if encryptionMode == .encrypt {
-                        // TODO: validate the file name below
                         TextField("", text: $newFileName, prompt: Text("New File Name").foregroundStyle(Color.gray))
                             .focused($focusedField, equals: .filename)
                             .onSubmit { focusedField = .password }
@@ -127,27 +137,41 @@ struct EncryptActionView: View {
                             .foregroundColor(.black)
                             .padding(10)
                             .background(Color.white)
-                            .border(Color(UIColor.separator))
                             .cornerRadius(10.0)
+                            .overlay() {
+                                RoundedRectangle(cornerRadius: 10).stroke( fileNameError == nil ? .gray : .red, lineWidth: 4)
+                            }
+                            .onChange(of: newFileName) {
+                                validateFileName()
+                            }
                     }
-                    // TODO: validate a minimum length of 1
                     SecureField("", text: $encryptionPassword, prompt: Text("\(encryptionMode == .encrypt ?  "Encryption" : "Decryption") Password").foregroundStyle(Color.gray))
                         .focused($focusedField, equals: .password)
                         .onSubmit { encryptionMode == .encrypt ? focusedField = .verify : nil}
                         .foregroundColor(.black)
                         .padding(10)
                         .background(Color.white)
-                        .border(Color(UIColor.separator))
                         .cornerRadius(10.0)
+                        .overlay() {
+                            RoundedRectangle(cornerRadius: 10).stroke( passwordError == nil ? .gray : .red, lineWidth: 4)
+                        }
+                        .onChange(of: encryptionPassword) {
+                            validatePasswordRequirements()
+                        }
+                
                     if encryptionMode == .encrypt {
-                        // TODO: validate that this matches the encryption password above
                         SecureField("", text: $encryptionVerifyPassword, prompt: Text("Verify Password").foregroundStyle(Color.gray))
                             .focused($focusedField, equals: .verify)
                             .foregroundColor(.black)
                             .padding(10)
                             .background(Color.white)
-                            .border(Color(UIColor.separator))
                             .cornerRadius(10.0)
+                            .overlay() {
+                                RoundedRectangle(cornerRadius: 10).stroke( verifyError == nil ? .gray : .red, lineWidth: 4)
+                            }
+                            .onChange(of: encryptionVerifyPassword) {
+                                validateVerifyPasswordRequirements()
+                            }
                     }
                     Button(action: {() -> () in handleButtonPress()}, label: {
                         Text("  Start \(encryptionMode == .encrypt ?  "Encryption" : "Decryption")  ")
