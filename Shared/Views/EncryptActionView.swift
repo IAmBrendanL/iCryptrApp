@@ -26,6 +26,7 @@ struct EncryptActionView: View {
     @Environment(\.dismiss) private var dismiss
     @Binding var fileURL: URL?
     @Binding var pickedPhoto: PhotosPickerItem?
+    @State private var outputLocation: URL?
     @State private var photo: UIImage?
     @State private var encryptionPassword: String = ""
     @State private var encryptionVerifyPassword: String = ""
@@ -70,23 +71,24 @@ struct EncryptActionView: View {
     func handleButtonPress() {
         // dismiss keyboard
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-        // validate requirements first
-        validateFileName()
+        // validate requirements
         validatePasswordRequirements()
-        validateVerifyPasswordRequirements()
+        if encryptionMode == .encrypt {
+            validateFileName()
+            validateVerifyPasswordRequirements()
+        }
         if fileNameError != nil || passwordError != nil || verifyError != nil {
             // TODO: Show an alert with at least one of the error messages and or make the button default to greyed out _unless_ all conditions are met
             return
         }
         encryptionStatus = .inProgress
-        print("In progress")
+        NSLog("Starting Encryption")
         Task(priority: .userInitiated) {
             if let unwrappedFileURL = fileURL {
                 /* Stream Cryptor Implementation */
                  let cryptor = try? StreamCryptor(fileLoc: unwrappedFileURL, forOperation: encryptionMode, withPassword: encryptionPassword)
                  if cryptor != nil  {
-                     let success = cryptor!.cryptFile(newName: encryptionMode == .encrypt ? newFileName : nil)
-                     print(success ? "Succeeded encrypting" : "Failed encrypting")
+                     self.outputLocation = cryptor!.cryptFile(newName: encryptionMode == .encrypt ? newFileName : nil)
                  }
             }
             encryptionStatus = .completed
@@ -116,6 +118,17 @@ struct EncryptActionView: View {
         verifyError = encryptionPassword.count > 1 ? verifyError : "Cannot be blank"
     }
     
+    /// Opens the file app to the encrypted or decrypted file
+    func viewOutputFile() {
+        if outputLocation != nil {
+            let shareLocation = outputLocation!.absoluteString.replacingOccurrences(of: "file://", with: "shareddocuments://")
+            UIApplication.shared.open(URL(string: shareLocation)!)
+        } else {
+           // TODO: theoretically... we shouldn't get here if the display logic stays the same but we should consider handling it better
+           dismiss()
+        }
+    }
+    
     var body: some View {
         ZStack {
             Color.gray.edgesIgnoringSafeArea(.all)
@@ -139,7 +152,7 @@ struct EncryptActionView: View {
                             .background(Color.white)
                             .cornerRadius(10.0)
                             .overlay() {
-                                RoundedRectangle(cornerRadius: 10).stroke( fileNameError == nil ? .gray : .red, lineWidth: 4)
+                                RoundedRectangle(cornerRadius: 10).stroke( fileNameError == nil ? .clear : .red, lineWidth: 4)
                             }
                             .onChange(of: newFileName) {
                                 validateFileName()
@@ -153,7 +166,7 @@ struct EncryptActionView: View {
                         .background(Color.white)
                         .cornerRadius(10.0)
                         .overlay() {
-                            RoundedRectangle(cornerRadius: 10).stroke( passwordError == nil ? .gray : .red, lineWidth: 4)
+                            RoundedRectangle(cornerRadius: 10).stroke( passwordError == nil ? .clear: .red, lineWidth: 4)
                         }
                         .onChange(of: encryptionPassword) {
                             validatePasswordRequirements()
@@ -167,7 +180,7 @@ struct EncryptActionView: View {
                             .background(Color.white)
                             .cornerRadius(10.0)
                             .overlay() {
-                                RoundedRectangle(cornerRadius: 10).stroke( verifyError == nil ? .gray : .red, lineWidth: 4)
+                                RoundedRectangle(cornerRadius: 10).stroke( verifyError == nil ? .clear: .red, lineWidth: 4)
                             }
                             .onChange(of: encryptionVerifyPassword) {
                                 validateVerifyPasswordRequirements()
@@ -195,27 +208,40 @@ struct EncryptActionView: View {
                         .controlSize(.large)
                         .scaleEffect(1.5)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(Color.black.opacity(0.6))
+                        .background(Color.black.opacity(0.8))
                 }
                 if encryptionStatus == .completed {
                     ZStack {
                         Color.black
-                            .opacity(0.6)
+                            .opacity(0.8)
                             .ignoresSafeArea()
                         VStack {
-                            Text("\(encryptionMode == .encrypt ? "Encryption" : "Decryption") Completed")
+                            Text("\(encryptionMode == .encrypt ? "Encryption" : "Decryption") \(outputLocation != nil ? "Completed" : "Failed")")
                                 .font(.largeTitle)
                                 .foregroundStyle(.white)
                                 .padding(.top, 160)
+                            if outputLocation != nil {
+                                Button(action: viewOutputFile) {
+                                    Text("View File")
+                                        .font(.largeTitle)
+                                        .foregroundColor(.white)
+                                        .padding()
+                                        .background(Color.blue)
+                                        .cornerRadius(10.0)
+                                }
+                                .padding(.bottom, 10)
+                            }
                             Button(action: {() -> () in dismiss() }) {
-                                Text("Done")
-                                    .font(.largeTitle)
-                                    .foregroundColor(.white)
+                                Text("Close")
+                                    .font(.title2)
+                                    .foregroundColor(.blue)
                                     .padding()
-                                    .background(Color.blue)
+                                    .background(Color.gray.opacity(0.3))
                                     .cornerRadius(10.0)
                             }
                         }
+                        .padding()
+                        .cornerRadius(10.0)
                     }
                 }
             }

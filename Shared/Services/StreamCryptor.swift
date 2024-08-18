@@ -115,18 +115,18 @@ class StreamCryptor {
     
     /// Encrypt or Decrypt the file given to the stream cryptor
     /// - Parameter newFileName: the new file name to write to if this is for encryption
-    /// - Returns: a boolean indicating success/fail
-    public func cryptFile(newName newFileName: String?) -> Bool {
+    /// - Returns: a url for where the file was written to if successful else nil
+    public func cryptFile(newName newFileName: String?) -> URL? {
         // TODO: make this function throw and return an error mesage or perhaps just return a String?``
-        guard checkForAvailibleSpace() else { return false }
-        guard !(self.operation == CCOperation(kCCEncrypt) && newFileName == nil) else { return false }  // verify that we have a file name for encryption
+        guard !(self.operation == CCOperation(kCCEncrypt) && newFileName == nil) else { return nil }  // verify that we have a file name for encryption
         guard inFileLocation.startAccessingSecurityScopedResource() else {
-            return false
-        } 
+            return nil
+        }
         defer {
             inFileLocation.stopAccessingSecurityScopedResource()
         }
-        guard let outputLocation = getOutputFileURL(newFileName: newFileName) else { return false }
+        guard checkForAvailibleSpace() else { return nil }
+        guard let outputLocation = getOutputFileURL(newFileName: newFileName) else { return nil }
         do {
             let inFileHandle = try FileHandle(forReadingFrom: inFileLocation)
             defer {
@@ -157,10 +157,11 @@ class StreamCryptor {
                     outFileHandle.write(cypherText)
                 }
             }
-            return self.status == CCCryptorStatus(kCCSuccess)
+            return self.status == CCCryptorStatus(kCCSuccess) ? outputLocation : nil
         } catch {
+            // TODO: better error hanling
             print("Error opening file handles: \(error)")
-            return false
+            return nil
         }
     }
     
