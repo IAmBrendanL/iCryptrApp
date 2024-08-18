@@ -13,9 +13,8 @@ struct ThumbnailView: View {
     @State private var thumbnail: UIImage?
     
     private func generateThumbnail() async -> UIImage? {
-        //TODO: Get this actually working
         let generator = QLThumbnailGenerator.shared
-        let size = CGSize(width: 100, height: 100)
+        let size = CGSize(width: 400, height: 400)
         let request = await QLThumbnailGenerator.Request(fileAt: fileURL, size: size, scale: UIScreen.main.scale, representationTypes: .all)
         guard let thumbnailRep = try? await generator.generateBestRepresentation(for: request) else {
             return nil
