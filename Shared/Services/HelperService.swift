@@ -17,7 +17,6 @@ enum EncryptionMode {
 
 struct HelperService {
     
-    
     /// Get a thumbnail for a file
     /// - Parameters:
     ///   - fileURL: The URL of the file for which you want to create a thumbnail.
@@ -58,5 +57,15 @@ struct HelperService {
         }
         // if here then in 10000 iterations no filename was found to be available
         return nil
+    }
+
+    /// Deletes the file at the specified URL.
+    /// - Parameter fileURL: The URL of the file to delete.
+    static func deleteFile(at fileURL: URL) {
+        do {
+            try FileManager.default.removeItem(at: fileURL)
+        } catch {
+            print("Error deleting file: \(error)")
+        }
     }
 }

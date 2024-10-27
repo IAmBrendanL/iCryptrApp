@@ -24,10 +24,9 @@ fileprivate enum FocusableField {
 
 struct EncryptActionView: View {
     @Environment(\.dismiss) private var dismiss
-    @Binding var fileURL: URL?
-    @Binding var pickedPhoto: PhotosPickerItem?
+    @Binding var fileURL: URL? // optional because it's possible for this to be nil in the home view
+    @State var shouldDeleteFileOnCompletion: Bool = false
     @State private var outputLocation: URL?
-    @State private var photo: UIImage?
     @State private var encryptionPassword: String = ""
     @State private var encryptionVerifyPassword: String = ""
     @State private var newFileName: String = ""
@@ -37,37 +36,17 @@ struct EncryptActionView: View {
     @State private var verifyError: String? = nil
     @FocusState private var focusedField: FocusableField?
     
+    // MARK: - Computed Properties
     var fileName: String {
-        if fileURL != nil {
-            return fileURL!.deletingPathExtension().lastPathComponent
-        } else if pickedPhoto != nil {
-            return pickedPhoto?.itemIdentifier ?? "Photo"
-        }
-        return "Name not found"
+        return fileURL?.deletingPathExtension().lastPathComponent ?? "FilleNameMissing"
     }
-   
+    
     var encryptionMode: EncryptionMode {
-        if let fileExtension = fileURL?.pathExtension {
-            return fileExtension == "iCryptr" ? .decrypt : .encrypt
-        }
-        return .encrypt
-    }
-
-    var photoThumbnail: UIImage? {
-        if pickedPhoto != nil {
-            var supported: [UTType] = []
-            pickedPhoto?.supportedContentTypes.forEach() { type in
-                supported.append(type)
-            }
-            // Task {
-            //     let thing = try? await pickedPhoto?.loadTransferable(type: Image.self)
-            // }
-            // print("Identifier: ", pickedPhoto?.itemIdentifier)
-        }
-        return nil
+        return fileURL?.pathExtension == "iCryptr" ? .decrypt : .encrypt
     }
     
-    
+    // MARK: - Methods
+    /// Handles all the actions needed when a user starts an action
     func handleButtonPress() {
         // dismiss keyboard
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
@@ -81,15 +60,20 @@ struct EncryptActionView: View {
             // TODO: Show an alert with at least one of the error messages and or make the button default to greyed out _unless_ all conditions are met
             return
         }
+        if fileURL == nil {
+            // TODO show an alert
+            return
+        }
         encryptionStatus = .inProgress
         NSLog("Starting Encryption")
         Task(priority: .userInitiated) {
-            if let unwrappedFileURL = fileURL {
-                /* Stream Cryptor Implementation */
-                 let cryptor = try? StreamCryptor(fileLoc: unwrappedFileURL, forOperation: encryptionMode, withPassword: encryptionPassword)
-                 if cryptor != nil  {
-                     self.outputLocation = cryptor!.cryptFile(newName: encryptionMode == .encrypt ? newFileName : nil)
-                 }
+            /* Stream Cryptor Implementation */
+            let cryptor = try? StreamCryptor(fileLoc: fileURL!, forOperation: encryptionMode, withPassword: encryptionPassword)
+            if cryptor != nil  {
+                self.outputLocation = cryptor!.cryptFile(newName: encryptionMode == .encrypt ? newFileName : nil)
+            }
+            if self.shouldDeleteFileOnCompletion {
+                HelperService.deleteFile(at: fileURL!)
             }
             encryptionStatus = .completed
         }
@@ -134,10 +118,8 @@ struct EncryptActionView: View {
             Color.gray.edgesIgnoringSafeArea(.all)
             ZStack {
                 VStack {
-                    if let fileURL = fileURL {
-                        ThumbnailView(fileURL: fileURL)
-                    } else if photoThumbnail != nil {
-                        // TODO: add view for photo thumbnail
+                    if fileURL != nil { // TODO: make the thumbnail for the iCryptr filetype
+                        ThumbnailView(fileURL: fileURL!)
                     }
                     Text("\(fileName)")
                         .font(.title)
@@ -196,10 +178,6 @@ struct EncryptActionView: View {
                     })
                 }
                 .padding(20)
-                .onDisappear() {
-                    pickedPhoto = nil
-                    fileURL = nil
-                }
                 if encryptionStatus == .inProgress {
                     ProgressView("\(encryptionMode == .encrypt ? "Encryption" : "Decryption") in Progress")
                         .tint(.white)
@@ -251,6 +229,6 @@ struct EncryptActionView: View {
 
 struct SwiftUIView_Previews: PreviewProvider {
     static var previews: some View {
-        EncryptActionView(fileURL: .constant(URL(string: "/Users/brendan/Desktop/best-4k-wallpapers_11063030_312.jpg")!), pickedPhoto: .constant(nil))
+        EncryptActionView(fileURL: .constant(URL(string: "/Users/brendan/Desktop/best-4k-wallpapers_11063030_312.jpg")!))
     }
 }

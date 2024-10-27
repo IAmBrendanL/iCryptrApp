@@ -20,7 +20,9 @@ import CommonCrypto
  */
 func generateKeyFromPassword(_ passwd: String, _ salt: Data, _ rounds: UInt32) -> Data? {
     var key = Data(count:kCCKeySizeAES256)
-    guard let saltString = String(data: salt, encoding: .ascii) else {return nil}
+    let saltString = salt.withUnsafeBytes { (ptr: UnsafeRawBufferPointer) -> String in
+        return String(decoding: ptr.bindMemory(to: UInt8.self), as: UTF8.self)
+    }
     let success = key.withUnsafeMutableBytes { keyPtr in
         return CCKeyDerivationPBKDF(CCPBKDFAlgorithm(kCCPBKDF2), passwd,
                                     strlen(passwd), saltString, strlen(saltString),
@@ -125,32 +127,6 @@ fileprivate func encryptDataWith(_ key: Data, _ iv: Data, _ plainData: Data) -> 
     // return result
     return kCCSuccess == status ? cipherData : nil
 }
-//fileprivate func encryptDataWith(_ key: Data, _ iv: Data, _ plainData: Data) -> Data? {
-//    // holds number needed
-//    var numEncrypted = 0
-//    // set cipherData size and store counts for modification
-//    var cipherData = Data(repeating: 0, count: plainData.count + iv.count)
-//    let cipherDataCount = cipherData.count
-//    let plainDataCount = plainData.count
-//    // start encrypton and return status
-//let status = key.withUnsafeBytes { keyPtr in
-//    iv.withUnsafeBytes { ivPtr in
-//        plainData.withUnsafeBytes { plainDataPtr in
-//            cipherData.withUnsafeMutableBytes { cipherDataPtr in
-//                return CCCrypt(CCOperation(kCCEncrypt), CCAlgorithm(kCCAlgorithmAES128),
-//                               CCOptions(kCCOptionPKCS7Padding), keyPtr.baseAddress, kCCKeySizeAES256,
-//                               ivPtr.baseAddress, plainDataPtr.baseAddress, plainDataCount,
-//                               cipherDataPtr.baseAddress, cipherDataCount, &numEncrypted)
-//            }
-//        }
-//    }
-//}
-//    //adjust bytes to real length
-//    cipherData.count = numEncrypted
-//    // return result
-//    return kCCSuccess == status ? cipherData : nil
-//}
-
 
 /**
 Swift wrapper around CCcrypt for decryption of data
@@ -277,6 +253,7 @@ func nondestructiveWrite(_ dirURL: URL, _ fileName: String, _ fileExtention: Str
      - passwd: The password to encrypt with
      - encryptedFileName: The file name to write the encrypted file to
  */
+@available(*, deprecated, message: "Use StreamCryptor instead")
 func encryptFile(_ fileURL: URL, _ passwd: String, _ encryptedFileName: String) -> Bool {
     
     var result = false
@@ -311,6 +288,7 @@ func encryptFile(_ fileURL: URL, _ passwd: String, _ encryptedFileName: String) 
      - fileURL: A URL with the file location
      - passwd: The password to decrypt with
  */
+@available(*, deprecated, message: "Use StreamCryptor instead")
 func decryptFile(_ fileURL: URL, _ passwd: String) -> Bool {
     var result = false
     do {

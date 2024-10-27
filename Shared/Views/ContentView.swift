@@ -35,12 +35,63 @@ struct ContentView: View {
         presentFileImporter = true
     }
     
+    func photoPickerCompletionHandler() {
+        if pickedPhoto != nil {
+            getURL(item: pickedPhoto!) { result in
+                switch result {
+                case .success(let photoURL):
+                    self.pickedURL = photoURL
+                case .failure(let failure):
+                    print("Failed to import item", failure)
+                    // TODO: Display import error
+                }
+            }
+        }
+    }
+    
+    
+    // TODO: change this to swift concurrency
+    func getURL(item: PhotosPickerItem, completionHandler: @escaping (_ result: Result<URL, Error>) -> Void) {
+        // Step 1: Load as Data object.
+        item.loadTransferable(type: Data.self) { result in
+            switch result {
+            case .success(let data):
+                if let contentType = item.supportedContentTypes.first {
+                    // Step 2: make the URL file name and a get a file extention.
+                    let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+                    let url = documentsDirectory.appendingPathComponent("\(UUID().uuidString).\(contentType.preferredFilenameExtension ?? "")")
+                    if let data = data {
+                        do {
+                            // Step 3: write to temp App file directory and return in completionHandler
+                            try data.write(to: url)
+                            completionHandler(.success(url))
+                        } catch {
+                            completionHandler(.failure(error))
+                        }
+                    }
+                }
+            case .failure(let failure):
+                completionHandler(.failure(failure))
+            }
+        }
+    }
+    
+    
     var body: some View {
         NavigationStack {
             ZStack {
                 Color.gray
                     .edgesIgnoringSafeArea(.all)
                 VStack {
+                    Button(action: {() -> () in handleButtonPress(for: .encrypt)}, label: {
+                        Text("  Encrypt File  ")
+                            .foregroundColor(Color.white)
+                            .font(.largeTitle)
+                            .padding()
+                            .background(Color.blue)
+                            .cornerRadius(10.0)
+                    })
+                    Spacer().frame(height: 20.0)
                     PhotosPicker(selection: $pickedPhoto, label: {
                         Text("Encrypt Photo")
                             .foregroundColor(Color.white)
@@ -49,16 +100,6 @@ struct ContentView: View {
                             .background(Color.blue)
                             .cornerRadius(10.0)
                     })
-                    Spacer().frame(height: 20.0)
-                    Button(action: {() -> () in handleButtonPress(for: .encrypt)}, label: {
-                        Text("  Encrypt File  ")
-                            .foregroundColor(Color.white)
-                            .font(.largeTitle)
-                            .padding()
-                            .background(Color.blue)
-                            .cornerRadius(10.0)
-                        }
-                    )
                     Spacer().frame(height: 20.0)
                     Button(action: {() -> () in handleButtonPress(for: .decrypt)}, label: {
                         Text(" Decrypt File  ")
@@ -72,13 +113,11 @@ struct ContentView: View {
                 }
                 .onChange(of: pickedPhoto) {
                     if pickedPhoto != nil {
-                        pickedURL = nil // shouldn't be necessary
-                        presentEncryptionView = true
+                        photoPickerCompletionHandler()
                     }
                 }
                 .onChange(of: pickedURL) {
                     if pickedURL != nil {
-                        pickedPhoto = nil // shouldn't be necessary
                         presentEncryptionView = true
                     }
                 }
@@ -96,7 +135,10 @@ struct ContentView: View {
                 }
             }
             .navigationDestination(isPresented: $presentEncryptionView) {
-                EncryptActionView(fileURL: $pickedURL, pickedPhoto: $pickedPhoto)
+                EncryptActionView(fileURL: $pickedURL, shouldDeleteFileOnCompletion: $pickedPhoto.wrappedValue != nil)
+                    .onAppear() {
+                        self.pickedPhoto = nil // reset if a photo was selected
+                    }
             }
             .navigationTitle("iCryptr")
         }
