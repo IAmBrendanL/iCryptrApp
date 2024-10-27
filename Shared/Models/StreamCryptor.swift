@@ -117,11 +117,9 @@ class StreamCryptor {
     /// - Parameter newFileName: the new file name to write to if this is for encryption
     /// - Returns: a url for where the file was written to if successful else nil
     public func cryptFile(newName newFileName: String?) -> URL? {
-        // TODO: make this function throw and return an error mesage or perhaps just return a String?``
         guard !(self.operation == CCOperation(kCCEncrypt) && newFileName == nil) else { return nil }  // verify that we have a file name for encryption
-        guard inFileLocation.startAccessingSecurityScopedResource() else {
-            return nil
-        }
+        // The below is needed in some circumstances, I'm not checking the return value because I'm using `defer` which is block scoped.
+        let _  = inFileLocation.startAccessingSecurityScopedResource()
         defer {
             inFileLocation.stopAccessingSecurityScopedResource()
         }
@@ -136,7 +134,7 @@ class StreamCryptor {
             defer {
                 outFileHandle.closeFile()
             }
-            // pack or move the offset
+            // pack the file or move the offset
             if self.operation == CCOperation(kCCEncrypt)  {
                 let originalFileNameAndExtension = inFileLocation.lastPathComponent
                 try packFile(into: outFileHandle, preEncryptionNameAndExtension: originalFileNameAndExtension)

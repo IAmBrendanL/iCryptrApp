@@ -7,6 +7,7 @@
 
 import Foundation
 
+/*
 extension OutputStream {
     
     func write(_ data: Data) throws {
@@ -33,3 +34,4 @@ extension OutputStream {
     }
 }
 
+*/
