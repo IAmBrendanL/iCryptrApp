@@ -17,6 +17,8 @@ struct ThumbnailView: View {
         defer {
             fileURL.stopAccessingSecurityScopedResource()
         }
+        
+        // Use the system thumbnail generator for all files
         let generator = QLThumbnailGenerator.shared
         let size = CGSize(width: 400, height: 400)
         let request = await QLThumbnailGenerator.Request(fileAt: fileURL, size: size, scale: UIScreen.main.scale, representationTypes: .all)
@@ -28,12 +30,16 @@ struct ThumbnailView: View {
     
     var body: some View {
         VStack {
-            if thumbnail != nil {
-                Image(uiImage: thumbnail!)
+            if let thumbnail = thumbnail {
+                Image(uiImage: thumbnail)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
+                    .cornerRadius(10)
+                    .shadow(radius: 3)
             } else {
-                Text("Thumbnail not available")
+                ProgressView()
+                    .scaleEffect(1.5)
+                    .padding()
             }
         }
         .onAppear {
