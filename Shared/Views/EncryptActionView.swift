@@ -90,10 +90,23 @@ struct EncryptActionView: View {
     
     /// Validates the password requirements and sets any required error messages
     func validatePasswordRequirements() {
-        // The password must contain at least one uppercase letter, one lowercase letter, one number, and be at least 8 characters long
-        let passwordRegex = "^(?=.*[A-Z])(?=.*[0-9])(?=.*[a-z]).{8,}$"
-        let passwordPredicate = NSPredicate(format: "SELF MATCHES %@", passwordRegex)
-        passwordError = passwordPredicate.evaluate(with: encryptionPassword) ? nil : "The password must contain at least one uppercase letter, one lowercase letter, one number, and be at least 8 characters long"
+        // Check each requirement individually and return the first error found
+        if encryptionMode == .decrypt {
+            return
+        }
+        if encryptionPassword.count < 8 {
+            passwordError = "Must be at least 8 characters long"
+        } else if !encryptionPassword.contains(where: { $0.isUppercase }) {
+            passwordError = "Must contain at least one uppercase letter"
+        } else if !encryptionPassword.contains(where: { $0.isLowercase }) {
+            passwordError = "Must contain at least one lowercase letter"
+        } else if !encryptionPassword.contains(where: { $0.isNumber }) {
+            passwordError = "Must contain at least one number"
+        } else if !encryptionPassword.contains(where: { $0.isSymbol || $0.isPunctuation || $0 == " " }) {
+            passwordError = "Must contain at least one special character"
+        } else {
+            passwordError = nil
+        }
     }
     
     /// Validates the verification password requirements and sets any required error messages
@@ -125,49 +138,42 @@ struct EncryptActionView: View {
                         .font(.title)
                         .foregroundColor(Color.white)
                     if encryptionMode == .encrypt {
-                        TextField("", text: $newFileName, prompt: Text("New File Name").foregroundStyle(Color.gray))
-                            .focused($focusedField, equals: .filename)
-                            .onSubmit { focusedField = .password }
-                            .autocorrectionDisabled()
-                            .foregroundColor(.black)
-                            .padding(10)
-                            .background(Color.white)
-                            .cornerRadius(10.0)
-                            .overlay() {
-                                RoundedRectangle(cornerRadius: 10).stroke( fileNameError == nil ? .clear : .red, lineWidth: 4)
-                            }
-                            .onChange(of: newFileName) {
-                                validateFileName()
-                            }
+                        ErrorTextField(
+                            title: "New File Name",
+                            text: $newFileName,
+                            errorMessage: fileNameError,
+                            onSubmit: { focusedField = .password }
+                        )
+                        .focused($focusedField, equals: .filename)
+                        .onChange(of: newFileName) {
+                            validateFileName()
+                        }
                     }
-                    SecureField("", text: $encryptionPassword, prompt: Text("\(encryptionMode == .encrypt ?  "Encryption" : "Decryption") Password").foregroundStyle(Color.gray))
-                        .focused($focusedField, equals: .password)
-                        .onSubmit { encryptionMode == .encrypt ? focusedField = .verify : nil}
-                        .foregroundColor(.black)
-                        .padding(10)
-                        .background(Color.white)
-                        .cornerRadius(10.0)
-                        .overlay() {
-                            RoundedRectangle(cornerRadius: 10).stroke( passwordError == nil ? .clear: .red, lineWidth: 4)
-                        }
-                        .onChange(of: encryptionPassword) {
-                            validatePasswordRequirements()
-                        }
+                    ErrorTextField(
+                        title: "\(encryptionMode == .encrypt ? "Encryption" : "Decryption") Password",
+                        text: $encryptionPassword,
+                        errorMessage: passwordError,
+                        isSecure: true,
+                        onSubmit: { encryptionMode == .encrypt ? focusedField = .verify : nil }
+                    )
+                    .focused($focusedField, equals: .password)
+                    .onChange(of: encryptionPassword) {
+                        validatePasswordRequirements()
+                    }
                 
                     if encryptionMode == .encrypt {
-                        SecureField("", text: $encryptionVerifyPassword, prompt: Text("Verify Password").foregroundStyle(Color.gray))
-                            .focused($focusedField, equals: .verify)
-                            .foregroundColor(.black)
-                            .padding(10)
-                            .background(Color.white)
-                            .cornerRadius(10.0)
-                            .overlay() {
-                                RoundedRectangle(cornerRadius: 10).stroke( verifyError == nil ? .clear: .red, lineWidth: 4)
-                            }
-                            .onChange(of: encryptionVerifyPassword) {
-                                validateVerifyPasswordRequirements()
-                            }
+                        ErrorTextField(
+                            title: "Verify Password",
+                            text: $encryptionVerifyPassword,
+                            errorMessage: verifyError,
+                            isSecure: true
+                        )
+                        .focused($focusedField, equals: .verify)
+                        .onChange(of: encryptionVerifyPassword) {
+                            validateVerifyPasswordRequirements()
+                        }
                     }
+                    
                     Button(action: {() -> () in handleButtonPress()}, label: {
                         Text("  Start \(encryptionMode == .encrypt ?  "Encryption" : "Decryption")  ")
                             .foregroundColor(Color.white)
@@ -229,6 +235,6 @@ struct EncryptActionView: View {
 
 struct SwiftUIView_Previews: PreviewProvider {
     static var previews: some View {
-        EncryptActionView(fileURL: .constant(URL(string: "/Users/brendan/Desktop/best-4k-wallpapers_11063030_312.jpg")!))
+        EncryptActionView(fileURL: .constant(URL(string: "/Users/brendan/Desktop/best-4k-wallpapers_11063030_312.icryptr")!))
     }
 }

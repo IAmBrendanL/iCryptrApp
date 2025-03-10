@@ -16,6 +16,7 @@ struct ContentView: View {
     @State var fileTypes: [UTType] = []
     @State var presentFileImporter = false
     @State var presentEncryptionView = false
+    @State private var showHelp = false
     @State private var navPath = NavigationPath()
     
     func fileImporterOnCompletion(result: Result<URL, Error>) {
@@ -123,7 +124,9 @@ struct ContentView: View {
                 }
                 .fileImporter(isPresented: $presentFileImporter, allowedContentTypes: fileTypes, onCompletion: fileImporterOnCompletion)
                 .toolbar {
-                    Button(action: {() -> () in print("NOT YET IMPLEMENTED")}){ Text("?") .foregroundColor(Color.black)
+                    Button(action: { showHelp = true }) { 
+                        Text("?")
+                            .foregroundColor(Color.black)
                             .font(.title)
                             .padding(10)
                             .background(
@@ -132,6 +135,9 @@ struct ContentView: View {
                                     .opacity(0.5)
                             )
                     }
+                }
+                .sheet(isPresented: $showHelp) {
+                    HelpView()
                 }
             }
             .navigationDestination(isPresented: $presentEncryptionView) {
@@ -148,9 +154,7 @@ struct ContentView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        Group {
-            ContentView()
-                .previewDevice("iPhone 13 Pro")
-        }
+        ContentView()
+            .previewDevice("iPhone 13 Pro")
     }
 }

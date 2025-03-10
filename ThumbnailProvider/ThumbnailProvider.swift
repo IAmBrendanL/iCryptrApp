@@ -11,28 +11,69 @@ import QuickLookThumbnailing
 class ThumbnailProvider: QLThumbnailProvider {
     
     override func provideThumbnail(for request: QLFileThumbnailRequest, _ handler: @escaping (QLThumbnailReply?, Error?) -> Void) {
-        
-        // There are three ways to provide a thumbnail through a QLThumbnailReply. Only one of them should be used.
-        
-        // First way: Draw the thumbnail into the current context, set up with UIKit's coordinate system.
-        // handler(QLThumbnailReply(contextSize: request.maximumSize, currentContextDrawing: { () -> Bool in
+        // Create a simple thumbnail with a solid green background and a lock icon
+        let reply = QLThumbnailReply(contextSize: request.maximumSize) { context in
+            let rect = CGRect(origin: .zero, size: request.maximumSize)
             
-        //     return true
-        // }), nil)
-        
-        /*
-        
-        // Second way: Draw the thumbnail into a context passed to your block, set up with Core Graphics's coordinate system.
-        handler(QLThumbnailReply(contextSize: request.maximumSize, drawing: { (context) -> Bool in
-            // Draw the thumbnail here.
-         
-            // Return true if the thumbnail was successfully drawn inside this block.
+            // Fill the entire background with a solid green color
+            UIColor(red: 0.0, green: 0.7, blue: 0.3, alpha: 1.0).setFill()
+            UIBezierPath(rect: rect).fill()
+            
+            // Draw a simple white lock icon
+            let lockSize = min(rect.width, rect.height) * 0.4
+            let lockX = (rect.width - lockSize) / 2
+            let lockY = (rect.height - lockSize) / 2
+            
+            // Draw lock body (rectangle with rounded corners)
+            let lockBodyRect = CGRect(
+                x: lockX,
+                y: lockY + lockSize * 0.3,
+                width: lockSize,
+                height: lockSize * 0.7
+            )
+            let lockBodyPath = UIBezierPath(roundedRect: lockBodyRect, cornerRadius: lockSize * 0.1)
+            UIColor.white.setFill()
+            lockBodyPath.fill()
+            
+            // Draw lock shackle (U shape)
+            let shacklePath = UIBezierPath()
+            shacklePath.move(to: CGPoint(x: lockX + lockSize * 0.25, y: lockY + lockSize * 0.3))
+            shacklePath.addLine(to: CGPoint(x: lockX + lockSize * 0.25, y: lockY))
+            shacklePath.addArc(
+                withCenter: CGPoint(x: lockX + lockSize * 0.5, y: lockY),
+                radius: lockSize * 0.25,
+                startAngle: .pi,
+                endAngle: 0,
+                clockwise: true
+            )
+            shacklePath.addLine(to: CGPoint(x: lockX + lockSize * 0.75, y: lockY + lockSize * 0.3))
+            shacklePath.lineWidth = lockSize * 0.1
+            UIColor.white.setStroke()
+            shacklePath.stroke()
+            
+            // Add "iCryptr" text at the bottom
+            let text = "iCryptr"
+            let fontSize = min(rect.width, rect.height) * 0.1
+            let font = UIFont.boldSystemFont(ofSize: fontSize)
+            let textAttributes: [NSAttributedString.Key: Any] = [
+                .font: font,
+                .foregroundColor: UIColor.white
+            ]
+            
+            let textSize = text.size(withAttributes: textAttributes)
+            let textRect = CGRect(
+                x: (rect.width - textSize.width) / 2,
+                y: rect.height - textSize.height - 20,
+                width: textSize.width,
+                height: textSize.height
+            )
+            
+            text.draw(in: textRect, withAttributes: textAttributes)
+            
             return true
-        }), nil)
-         
-        // Third way: Set an image file URL.
-        handler(QLThumbnailReply(imageFileURL: Bundle.main.url(forResource: "fileThumbnail", withExtension: "jpg")!), nil)
+        }
         
-        */
+        reply.extensionBadge = "iCryptr"
+        handler(reply, nil)
     }
 }
