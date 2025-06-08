@@ -7,13 +7,18 @@
 
 import SwiftUI
 import QuickLookThumbnailing
+import os.log
 
 struct ThumbnailView: View {
     let fileURL: URL
     @State private var thumbnail: UIImage?
     
     private func generateThumbnail() async -> UIImage? {
-        fileURL.startAccessingSecurityScopedResource()
+        let access = fileURL.startAccessingSecurityScopedResource()
+        if !access {
+            os_log("Failed to access security scoped resource for thumbnail generation", type: .error)
+            return nil
+        }
         defer {
             fileURL.stopAccessingSecurityScopedResource()
         }
@@ -21,7 +26,7 @@ struct ThumbnailView: View {
         // Use the system thumbnail generator for all files
         let generator = QLThumbnailGenerator.shared
         let size = CGSize(width: 400, height: 400)
-        let request = await QLThumbnailGenerator.Request(fileAt: fileURL, size: size, scale: UIScreen.main.scale, representationTypes: .all)
+        let request = QLThumbnailGenerator.Request(fileAt: fileURL, size: size, scale: UIScreen.main.scale, representationTypes: .all)
         guard let thumbnailRep = try? await generator.generateBestRepresentation(for: request) else {
             return nil
         }

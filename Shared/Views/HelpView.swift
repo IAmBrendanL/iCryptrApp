@@ -67,7 +67,8 @@ struct HelpView: View {
                             .fontWeight(.bold)
                         
                         VStack(alignment: .leading, spacing: 10) {
-                            Text("• If you forget your password, your encrypted files CANNOT be recovered")
+                            Text("• If you forget your password, your encrypted files CANNOT be recovered.")
+                            Text("• Consider using a password manager to securely save your passwords.")
                             Text("• Always keep backups of your important files")
                         }
                         .font(.body)
@@ -75,7 +76,7 @@ struct HelpView: View {
                 }
                 .padding()
             }
-            .navigationTitle("Help")
+            .navigationTitle("Info & Help")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -93,4 +94,4 @@ struct HelpView_Previews: PreviewProvider {
         HelpView()
             .previewDevice("iPhone 13 Pro")
     }
-} 
+}

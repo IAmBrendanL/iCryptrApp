@@ -13,10 +13,10 @@ import CommonCrypto
 /**
  Derieves an AES256 key from given password, salt, and rounds using Apple's open source CommonCrypto library
  - parameters:
-    - passwd: The password from the user.
-    - salt: A salt generated or from a file to decrypt.
-    - rounds: A UInt32 signifying the number of rounds to run the key derivation algorithm. Use getKeyGenerationRounds
-              to generate or get it from a file to decrypt.
+ - passwd: The password from the user.
+ - salt: A salt generated or from a file to decrypt.
+ - rounds: A UInt32 signifying the number of rounds to run the key derivation algorithm. Use getKeyGenerationRounds
+ to generate or get it from a file to decrypt.
  */
 func generateKeyFromPassword(_ passwd: String, _ salt: Data, _ rounds: UInt32) -> Data? {
     var key = Data(count:kCCKeySizeAES256)
@@ -42,8 +42,8 @@ func generateKeyFromPassword(_ passwd: String, _ salt: Data, _ rounds: UInt32) -
 /**
  Get the rounds to run key derivation for current platform as an unsigned 32 bit integer in 500 milleseconds.
  - parameters:
-    - passwd: The password from the user.
-    - salt: A salt generated or from a file to decrypt.
+ - passwd: The password from the user.
+ - salt: A salt generated or from a file to decrypt.
  */
 func getKeyGenerationRounds(_ passwd: String, _ salt: Data) -> UInt32 {
     guard let saltString = String(data: salt, encoding: .ascii) else {return 9999}
@@ -96,12 +96,12 @@ func generateIVForFileEncryption() -> Data? {
 /**
  Swift wrapper around CCcrypt for encryption of data
  - Parameters:
-    - key: A Data object holding an AES256 key
-    - iv: A Data object holding an initialization vector
-    - plainData: A Data object holding the "PlßßainText" to encrypt
+ - key: A Data object holding an AES256 key
+ - iv: A Data object holding an initialization vector
+ - plainData: A Data object holding the "PlßßainText" to encrypt
  - Returns:
-    - A Data object with the encrypted data if successful
-    - nil if uncessful
+ - A Data object with the encrypted data if successful
+ - nil if uncessful
  */
 fileprivate func encryptDataWith(_ key: Data, _ iv: Data, _ plainData: Data) -> Data? {
     // holds number needed
@@ -129,13 +129,13 @@ fileprivate func encryptDataWith(_ key: Data, _ iv: Data, _ plainData: Data) -> 
 }
 
 /**
-Swift wrapper around CCcrypt for decryption of data
+ Swift wrapper around CCcrypt for decryption of data
  - Parameters:
-    - key: A Data object holding an AES256 key
-    - cipherData: A Data object holding the "CipherText" to decrypted
+ - key: A Data object holding an AES256 key
+ - cipherData: A Data object holding the "CipherText" to decrypted
  - Returns:
-    - A Data object with the decrypted data if successful
-    - nil if uncessful
+ - A Data object with the decrypted data if successful
+ - nil if uncessful
  */
 fileprivate func decryptDataWith(_ key: Data, _ iv: Data, _ cipherData: Data) -> Data? {
     // holds number needed
@@ -167,13 +167,13 @@ fileprivate func decryptDataWith(_ key: Data, _ iv: Data, _ cipherData: Data) ->
  Concatanates the binary data (salt, iv, and encrypted data) so that
  the file written out contains all of the peices needed to decrypt it
  - Parameters:
-    - salt: A Data object holding the salt string in bytes
-    - iv: A Data object holding the intialization vector bytes
-    - cipherFilenameAndType: A Data object holding the encrypted file name and type
-    - cipherData: A Data object holding the encrypted file data
+ - salt: A Data object holding the salt string in bytes
+ - iv: A Data object holding the intialization vector bytes
+ - cipherFilenameAndType: A Data object holding the encrypted file name and type
+ - cipherData: A Data object holding the encrypted file data
  - Returns:
-    - nil: If name len is too long or the binary data is not correctly created
-    - Data: the packed file if creation works
+ - nil: If name len is too long or the binary data is not correctly created
+ - Data: the packed file if creation works
  */
 fileprivate func packEncryptedFile(_ salt: Data, _ iv: Data, _ cipherFilenameAndType: Data, _ cipherData: Data) -> Data? {
     let lenData = Data(repeating: UInt8(cipherFilenameAndType.count), count: 1)
@@ -219,9 +219,9 @@ fileprivate func unpackEncryptedFile( _ encryptedData: Data) -> (salt: Data, iv:
  Try to write out a file to a unique file (avoid name collisons)
  Public as it may be useful elsewhere
  - Parameters:
-     - dirURL: The url to the directory to write the file
-     - fileName: The file name for the file to be written to
-     - fileData: The file data
+ - dirURL: The url to the directory to write the file
+ - fileName: The file name for the file to be written to
+ - fileData: The file data
  */
 func nondestructiveWrite(_ dirURL: URL, _ fileName: String, _ fileExtention: String, _ fileData: Data) -> Bool {
     let fManager = FileManager.default
@@ -238,7 +238,7 @@ func nondestructiveWrite(_ dirURL: URL, _ fileName: String, _ fileExtention: Str
                 return false
             }
         } else {
-             fileURL = dirURL_tmp.appendingPathComponent("\(fileName)-\(String(i)).\(fileExtention)")
+            fileURL = dirURL_tmp.appendingPathComponent("\(fileName)-\(String(i)).\(fileExtention)")
         }
     }
     // if here then in 10000 iterations no filename was found to be available
@@ -249,9 +249,9 @@ func nondestructiveWrite(_ dirURL: URL, _ fileName: String, _ fileExtention: Str
 /**
  Encrypts a file and writes out the encrypted data
  - Parameters:
-     - fileURL: A URL with the file location
-     - passwd: The password to encrypt with
-     - encryptedFileName: The file name to write the encrypted file to
+ - fileURL: A URL with the file location
+ - passwd: The password to encrypt with
+ - encryptedFileName: The file name to write the encrypted file to
  */
 @available(*, deprecated, message: "Use StreamCryptor instead")
 func encryptFile(_ fileURL: URL, _ passwd: String, _ encryptedFileName: String) -> Bool {
@@ -285,8 +285,8 @@ func encryptFile(_ fileURL: URL, _ passwd: String, _ encryptedFileName: String) 
 /**
  Decrypts a file and writes out the decrypted data
  - Parameters:
-     - fileURL: A URL with the file location
-     - passwd: The password to decrypt with
+ - fileURL: A URL with the file location
+ - passwd: The password to decrypt with
  */
 @available(*, deprecated, message: "Use StreamCryptor instead")
 func decryptFile(_ fileURL: URL, _ passwd: String) -> Bool {
