@@ -141,7 +141,7 @@ struct ContentView: View {
                 }
             }
             .navigationDestination(isPresented: $presentEncryptionView) {
-                EncryptActionView(fileURL: $pickedURL, shouldDeleteFileOnCompletion: $pickedPhoto.wrappedValue != nil)
+                EncryptActionView(fileURL: $pickedURL)
                     .onAppear() {
                         self.pickedPhoto = nil // reset if a photo was selected
                     }
