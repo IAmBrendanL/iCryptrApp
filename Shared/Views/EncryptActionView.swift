@@ -25,7 +25,6 @@ fileprivate enum FocusableField {
 struct EncryptActionView: View {
     @Environment(\.dismiss) private var dismiss
     @Binding var fileURL: URL? // optional because it's possible for this to be nil in the home view
-    @State var shouldDeleteFileOnCompletion: Bool = false
     @State private var outputLocation: URL?
     @State private var encryptionPassword: String = ""
     @State private var encryptionVerifyPassword: String = ""
@@ -64,16 +63,18 @@ struct EncryptActionView: View {
             // TODO show an alert
             return
         }
+        HelperService.isProcessing = true
         encryptionStatus = .inProgress
         NSLog("Starting Encryption")
         Task(priority: .userInitiated) {
+            defer {
+                HelperService.isProcessing = false
+                HelperService.clearDocumentsDirectory()
+            }
             /* Stream Cryptor Implementation */
             let cryptor = try? StreamCryptor(fileLoc: fileURL!, forOperation: encryptionMode, withPassword: encryptionPassword)
             if cryptor != nil  {
                 self.outputLocation = cryptor!.cryptFile(newName: encryptionMode == .encrypt ? newFileName : nil)
-            }
-            if self.shouldDeleteFileOnCompletion {
-                HelperService.deleteFile(at: fileURL!)
             }
             encryptionStatus = .completed
         }

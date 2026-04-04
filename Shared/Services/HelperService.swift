@@ -16,7 +16,25 @@ enum EncryptionMode {
 }
 
 struct HelperService {
-    
+
+    static var isProcessing = false
+
+    /// Removes all non-.icryptr files from the app's documents directory.
+    static func clearDocumentsDirectory() {
+        let fileManager = FileManager.default
+        let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        do {
+            let fileURLs = try fileManager.contentsOfDirectory(at: documentsURL, includingPropertiesForKeys: nil)
+            for fileURL in fileURLs {
+                if fileURL.pathExtension.lowercased() != "icryptr" {
+                    try fileManager.removeItem(at: fileURL)
+                }
+            }
+        } catch {
+            print("Error clearing documents directory: \(error)")
+        }
+    }
+
     /// Get a thumbnail for a file
     /// - Parameters:
     ///   - fileURL: The URL of the file for which you want to create a thumbnail.
