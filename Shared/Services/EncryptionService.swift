@@ -18,8 +18,9 @@ import CommonCrypto
  - rounds: A UInt32 signifying the number of rounds to run the key derivation algorithm. Use getKeyGenerationRounds
  to generate or get it from a file to decrypt.
  */
-func generateKeyFromPassword(_ passwd: String, _ salt: Data, _ rounds: UInt32) -> Data? {
-    var key = Data(count:kCCKeySizeAES256)
+func generateKeyFromPassword(_ passwd: String, _ salt: Data, _ rounds: UInt32,
+                             keySize: Int = kCCKeySizeAES256) -> Data? {
+    var key = Data(count: keySize)
     let saltString = salt.withUnsafeBytes { (ptr: UnsafeRawBufferPointer) -> String in
         return String(decoding: ptr.bindMemory(to: UInt8.self), as: UTF8.self)
     }
@@ -27,7 +28,7 @@ func generateKeyFromPassword(_ passwd: String, _ salt: Data, _ rounds: UInt32) -
         return CCKeyDerivationPBKDF(CCPBKDFAlgorithm(kCCPBKDF2), passwd,
                                     strlen(passwd), saltString, strlen(saltString),
                                     CCPseudoRandomAlgorithm(kCCPRFHmacAlgSHA256),
-                                    rounds, keyPtr, kCCKeySizeAES256)
+                                    rounds, keyPtr, keySize)
     }
     // if key derivation was successful
     if success == kCCSuccess {
@@ -115,7 +116,7 @@ fileprivate func encryptDataWith(_ key: Data, _ iv: Data, _ plainData: Data) -> 
         iv.withUnsafeBytes { ivPtr in
             plainData.withUnsafeBytes { plainDataPtr in
                 cipherData.withUnsafeMutableBytes { cipherDataPtr in
-                    return CCCrypt(CCOperation(kCCEncrypt), CCAlgorithm(kCCAlgorithmAES128),
+                    return CCCrypt(CCOperation(kCCEncrypt), CCAlgorithm(kCCAlgorithmAES),
                                    CCOptions(kCCOptionPKCS7Padding), keyPtr.baseAddress, kCCKeySizeAES256,
                                    ivPtr.baseAddress, plainDataPtr.baseAddress, plainDataCount,
                                    cipherDataPtr.baseAddress, cipherDataCount, &numEncrypted)
@@ -148,7 +149,7 @@ fileprivate func decryptDataWith(_ key: Data, _ iv: Data, _ cipherData: Data) ->
         iv.withUnsafeBytes { ivPtr in
             cipherData.withUnsafeBytes { cipherDataPtr in
                 plainData.withUnsafeMutableBytes { plainDataPtr in
-                    return CCCrypt(CCOperation(kCCDecrypt), CCAlgorithm(kCCAlgorithmAES128),
+                    return CCCrypt(CCOperation(kCCDecrypt), CCAlgorithm(kCCAlgorithmAES),
                                    CCOptions(kCCOptionPKCS7Padding), keyPtr.baseAddress, kCCKeySizeAES256,
                                    ivPtr.baseAddress, cipherDataPtr.baseAddress, cipherData.count,
                                    plainDataPtr.baseAddress, plainDataCount, &numDecrypted)
