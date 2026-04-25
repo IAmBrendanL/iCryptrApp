@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import UIKit
 import UniformTypeIdentifiers
 import PhotosUI
 
@@ -38,7 +37,7 @@ struct ContentView: View {
     
     func photoPickerCompletionHandler() {
         if pickedPhoto != nil {
-            getURL(item: pickedPhoto!) { result in
+            getPhotoURL(item: pickedPhoto!) { result in
                 switch result {
                 case .success(let photoURL):
                     self.pickedURL = photoURL
@@ -52,15 +51,15 @@ struct ContentView: View {
     
     
     // TODO: change this to swift concurrency
-    func getURL(item: PhotosPickerItem, completionHandler: @escaping (_ result: Result<URL, Error>) -> Void) {
+    func getPhotoURL(item: PhotosPickerItem, completionHandler: @escaping (_ result: Result<URL, Error>) -> Void) {
         // Step 1: Load as Data object.
         item.loadTransferable(type: Data.self) { result in
             switch result {
             case .success(let data):
                 if let contentType = item.supportedContentTypes.first {
                     // Step 2: make the URL file name and a get a file extention.
-                    let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-                    let url = documentsDirectory.appendingPathComponent("\(UUID().uuidString).\(contentType.preferredFilenameExtension ?? "")")
+                    let directory = FileManager.default.temporaryDirectory
+                    let url = directory.appendingPathComponent("\(UUID().uuidString).\(contentType.preferredFilenameExtension ?? "")")
                     if let data = data {
                         do {
                             // Step 3: write to temp App file directory and return in completionHandler
@@ -141,7 +140,7 @@ struct ContentView: View {
                 }
             }
             .navigationDestination(isPresented: $presentEncryptionView) {
-                EncryptActionView(fileURL: $pickedURL, shouldDeleteFileOnCompletion: $pickedPhoto.wrappedValue != nil)
+                EncryptActionView(fileURL: $pickedURL)
                     .onAppear() {
                         self.pickedPhoto = nil // reset if a photo was selected
                     }

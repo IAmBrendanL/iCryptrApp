@@ -77,9 +77,11 @@ struct HelpView: View {
                 .padding()
             }
             .navigationTitle("Info & Help")
+            #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+            #endif
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .automatic) {
                     Button("Done") {
                         dismiss()
                     }
