@@ -8,7 +8,6 @@
 
 import Foundation
 import CoreGraphics
-import QuickLook
 
 enum EncryptionMode {
     case encrypt
@@ -16,27 +15,23 @@ enum EncryptionMode {
 }
 
 struct HelperService {
-    
-    /// Get a thumbnail for a file
-    /// - Parameters:
-    ///   - fileURL: The URL of the file for which you want to create a thumbnail.
-    ///   - size: The desired size of the thumbnails.
-    ///   - scale: The scale of the thumbnails. This parameter usually represents the scale of the current screen. However, you can pass a screen scale to the initializer that isn’t the current device’s screen scale. For example, you can create thumbnails for different scales and upload them to a server in order to download them later on devices with a different screen scale.
-    func thumbnail(for fileURL: URL, size: CGSize, scale: CGFloat) {
-        let request = QLThumbnailGenerator
-            .Request(fileAt: fileURL, size: size, scale: scale,
-                     representationTypes: .lowQualityThumbnail)
-        QLThumbnailGenerator.shared.generateRepresentations(for: request) { (thumbnail, type, error) in
-            DispatchQueue.main.async {
-                if thumbnail == nil || error != nil {
-                    // Handle the error case gracefully.
-                } else {
-                    // Display the thumbnail that you created.
-                }
+
+    static var isProcessing = false
+
+    /// Removes all files from the app's temporary directory.
+    static func clearTemporaryDirectory() {
+        let fileManager = FileManager.default
+        let tmpURL = fileManager.temporaryDirectory
+        do {
+            let fileURLs = try fileManager.contentsOfDirectory(at: tmpURL, includingPropertiesForKeys: nil)
+            for fileURL in fileURLs {
+                try fileManager.removeItem(at: fileURL)
             }
+        } catch {
+            print("Error clearing temporary directory: \(error)")
         }
     }
-    
+
     /// Returns a URL for the output file with the specified name and file extension in the documents directory. Tries
     /// appending a number to the file name if the file already exists up to 10000 times.
     /// - Parameters:
