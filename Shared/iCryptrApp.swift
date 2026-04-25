@@ -17,7 +17,7 @@ struct iCryptrApp: App {
         }
         .onChange(of: scenePhase) {
             if scenePhase == .background && !HelperService.isProcessing {
-                HelperService.clearDocumentsDirectory()
+                HelperService.clearTemporaryDirectory()
             }
         }
     }

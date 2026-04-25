@@ -7,7 +7,6 @@
 //
 
 import SwiftUI
-import UIKit
 import PhotosUI
 
 enum EncryptionProgress {
@@ -43,12 +42,22 @@ struct EncryptActionView: View {
     var encryptionMode: EncryptionMode {
         return fileURL?.pathExtension == "iCryptr" ? .decrypt : .encrypt
     }
+
+    var viewFileButtonLabel: String {
+        #if os(iOS)
+        return "View File"
+        #else
+        return "Save File"
+        #endif
+    }
     
     // MARK: - Methods
     /// Handles all the actions needed when a user starts an action
     func handleButtonPress() {
         // dismiss keyboard
+        #if os(iOS)
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        #endif
         // validate requirements
         validatePasswordRequirements()
         if encryptionMode == .encrypt {
@@ -69,7 +78,7 @@ struct EncryptActionView: View {
         Task(priority: .userInitiated) {
             defer {
                 HelperService.isProcessing = false
-                HelperService.clearDocumentsDirectory()
+                HelperService.clearTemporaryDirectory()
             }
             /* Stream Cryptor Implementation */
             let cryptor = try? StreamCryptor(fileLoc: fileURL!, forOperation: encryptionMode, withPassword: encryptionPassword)
@@ -116,15 +125,28 @@ struct EncryptActionView: View {
         verifyError = encryptionPassword.count > 1 ? verifyError : "Cannot be blank"
     }
     
-    /// Opens the file app to the encrypted or decrypted file
+    /// Opens the file app to the encrypted or decrypted file (iOS), or prompts a save dialog (macOS)
     func viewOutputFile() {
-        if outputLocation != nil {
-            let shareLocation = outputLocation!.absoluteString.replacingOccurrences(of: "file://", with: "shareddocuments://")
-            UIApplication.shared.open(URL(string: shareLocation)!)
-        } else {
-           // TODO: theoretically... we shouldn't get here if the display logic stays the same but we should consider handling it better
-           dismiss()
+        guard let source = outputLocation else {
+            dismiss()
+            return
         }
+        #if os(iOS)
+        let shareLocation = source.absoluteString.replacingOccurrences(of: "file://", with: "shareddocuments://")
+        UIApplication.shared.open(URL(string: shareLocation)!)
+        #else
+        let panel = NSSavePanel()
+        panel.nameFieldStringValue = source.lastPathComponent
+        panel.begin { response in
+            guard response == .OK, let dest = panel.url else { return }
+            let fm = FileManager.default
+            if fm.fileExists(atPath: dest.path) {
+                // this is okay because macOS will add a confirmation before an overwrite 
+                try? fm.removeItem(at: dest)
+            }
+            try? fm.copyItem(at: source, to: dest)
+        }
+        #endif
     }
     
     var body: some View {
@@ -207,7 +229,7 @@ struct EncryptActionView: View {
                                 .padding(.top, 160)
                             if outputLocation != nil {
                                 Button(action: viewOutputFile) {
-                                    Text("View File")
+                                    Text(viewFileButtonLabel)
                                         .font(.largeTitle)
                                         .foregroundColor(.white)
                                         .padding()
