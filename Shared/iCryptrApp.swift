@@ -9,9 +9,16 @@ import SwiftUI
 
 @main
 struct iCryptrApp: App {
+    @Environment(\.scenePhase) var scenePhase
+
     var body: some Scene {
         WindowGroup {
             ContentView()
+        }
+        .onChange(of: scenePhase) {
+            if scenePhase == .background && !HelperService.isProcessing {
+                HelperService.clearTemporaryDirectory()
+            }
         }
     }
 }

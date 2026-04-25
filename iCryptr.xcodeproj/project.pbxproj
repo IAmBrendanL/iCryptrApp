@@ -724,7 +724,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.6;
 				PRODUCT_BUNDLE_IDENTIFIER = com.brendanlindsey.iCryptr.iCryptr;
 				PRODUCT_NAME = iCryptr;
 				SDKROOT = macosx;
@@ -750,7 +750,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.6;
 				PRODUCT_BUNDLE_IDENTIFIER = com.brendanlindsey.iCryptr.iCryptr;
 				PRODUCT_NAME = iCryptr;
 				SDKROOT = macosx;
