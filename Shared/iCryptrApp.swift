@@ -16,6 +16,8 @@ struct iCryptrApp: App {
             ContentView()
         }
         .onChange(of: scenePhase) {
+            // Clear scratch files (e.g. plaintext files imported by
+            // PhotosPicker) when the app backgrounds.
             if scenePhase == .background && !HelperService.isProcessing {
                 HelperService.clearTemporaryDirectory()
             }
