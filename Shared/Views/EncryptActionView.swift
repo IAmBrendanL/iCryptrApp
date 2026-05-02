@@ -72,6 +72,11 @@ struct EncryptActionView: View {
             // TODO show an alert
             return
         }
+        // `isProcessing` blocks the scenePhase background-cleanup from wiping
+        // the temp directory while crypto is running (see iCryptrApp.swift).
+        // It is cleared in the `defer` below so an early return or thrown
+        // error from StreamCryptor wont leave the app unable to clean up its 
+        // temp files until the next cold start.
         HelperService.isProcessing = true
         encryptionStatus = .inProgress
         NSLog("Starting Encryption")

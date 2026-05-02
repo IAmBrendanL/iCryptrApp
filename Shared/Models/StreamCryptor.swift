@@ -16,7 +16,10 @@ struct CryptoError: Error {
     let errorMessage: String? = nil
 }
 
-/// Holds unpacked data from an encrypted file for use when decrypting the file
+/// Holds unpacked data from an encrypted file for use when decrypting the file.
+/// `fileDataOffset` is where ciphertext begins (just past the header); `storedHMAC`
+/// is the trailing 32-byte tag that authenticates everything before it.
+/// See FILE_FORMAT.md for the full byte layout.
 struct UnpackedFile {
     let iv: Data
     let salt: Data
@@ -26,7 +29,8 @@ struct UnpackedFile {
 }
 
 class StreamCryptor {
-    private static let magicV2: [UInt8] = [0x69, 0x43, 0x52, 0x02]
+    // Format-version magic: ASCII "iCR" + version byte 0x01
+    private static let magicV1: [UInt8] = [0x69, 0x43, 0x52, 0x01]
     private static let hmacSize: Int = 32   // CC_SHA256_DIGEST_LENGTH
 
     private let operation: CCOperation
@@ -39,6 +43,9 @@ class StreamCryptor {
     private var salt: Data
     private var fileOffset: UInt64 = 0
     private var fileNameAndTypeData: String? = nil
+    // AES key and HMAC key are derived together from one PBKDF2 call (see init)
+    // and must be kept distinct — reusing the AES key as a MAC key would void
+    // the security argument for encrypt-then-MAC.
     private var hmacKey: Data?
     private var storedHMAC: Data?
     
@@ -62,6 +69,7 @@ class StreamCryptor {
             self.fileNameAndTypeData = unpackedFile.fileNameAndTypeData
             self.storedHMAC = unpackedFile.storedHMAC
         }
+        // This generates both the AES key and the HMAC key by doubling the key size target
         guard let keyMaterial = generateKeyFromPassword(password, salt, 750000,
                                                         keySize: kCCKeySizeAES256 * 2)
         else { throw CryptoError(status: CCStatus(kCCUnspecifiedError)) }
@@ -147,6 +155,9 @@ class StreamCryptor {
 
             if self.operation == CCOperation(kCCEncrypt) {
                 // --- Encryption: write header, stream ciphertext, append HMAC tag ---
+                // Encrypt-then-MAC: the tag covers the header *and* the
+                // ciphertext, so any later byte flip anywhere in the file
+                // (including the salt/IV/filename) is detected on decrypt.
                 let headerData = try packFile(into: outFileHandle,
                                               preEncryptionNameAndExtension: inFileLocation.lastPathComponent)
                 var hmacCtx = CCHmacContext()
@@ -178,6 +189,10 @@ class StreamCryptor {
 
             } else {
                 // --- Decryption: pass 1 verify HMAC, pass 2 decrypt ---
+                // Two passes are required because the tag sits at the *end* of
+                // the file but covers everything before it. Verifying first
+                // guarantees we never write a single plaintext byte from a
+                // tampered file or a wrong-password decryption attempt.
                 guard let storedHMAC = self.storedHMAC else { return nil }
 
                 // Pass 1: stream bytes 0..(fileSize-32) through HMAC and compare
@@ -258,8 +273,13 @@ class StreamCryptor {
         return Data(outData[..<amountBufFilled])
     }
     
-    /// Pack new file with data for later decryption
-    /// - Returns: the header bytes written, used as HMAC additional data
+    /// Pack new file with data for later decryption.
+    /// Header layout (see FILE_FORMAT.md): magic(4) | salt(64) | iv(16) |
+    /// nameLen(2) | name(nameLen). The filename is stored in plaintext —
+    /// `StreamCryptor` needs it to restore the original name + extension on
+    /// decryption, and the HMAC tag still authenticates it against tampering.
+    /// - Returns: the header bytes written, returned so the caller can feed
+    ///   them into the HMAC context (the tag covers the header too).
     @discardableResult
     private func packFile(into handle: FileHandle, preEncryptionNameAndExtension: String) throws -> Data {
         guard let fileNameAndExtension = preEncryptionNameAndExtension.data(using: .utf8) else {
@@ -268,7 +288,7 @@ class StreamCryptor {
         // since .utf8 takes 1-4 bytes per character using a UInt16 puts the upper lim at ~16k characters. I'd use a UInt8 but that would leave a max of 63 characters which could reasonably be exceeded by a filename + extension. Calculated with max_size/4
         var length = UInt16(fileNameAndExtension.count)
         let lengthData = Data(bytes: &length, count: MemoryLayout<UInt16>.size)
-        var header = Data(StreamCryptor.magicV2)
+        var header = Data(StreamCryptor.magicV1)
         for dataItem in [self.salt, self.iv, lengthData, fileNameAndExtension] {
             header.append(dataItem)
         }
@@ -292,14 +312,15 @@ class StreamCryptor {
             defer {
                 handle.closeFile()
             }
-            // Verify magic header — reject old-format or non-iCryptr files
+            // Verify magic header — reject anything that isn't an iCryptr file.
             let magic = handle.readData(ofLength: 4)
-            guard magic == Data(StreamCryptor.magicV2) else { return nil }
+            guard magic == Data(StreamCryptor.magicV1) else { return nil }
             let salt = handle.readData(ofLength: 64)
             let iv = handle.readData(ofLength: kCCBlockSizeAES128)
             guard let fileNameAndTypeLenData = try handle.read(upToCount: 2) else {
                 return nil
             }
+            // Read the length back in the same host byte order it was written.
             let fileNameAndTypeLen = try fileNameAndTypeLenData.withUnsafeBytes<UInt16>() { rawPtr -> UInt16 in
                 return rawPtr.load(as: UInt16.self)
             }
@@ -308,7 +329,7 @@ class StreamCryptor {
             }
             let fileNameAndTypeData = String(decoding: rawFileNameAndTypeData, as: UTF8.self)
             let fileDataOffset = try handle.offset()
-            // Read HMAC tag from end of file
+            // Read HMAC tag from the last 32 bytes
             let fileSize = handle.seekToEndOfFile()
             try handle.seek(toOffset: fileSize - UInt64(StreamCryptor.hmacSize))
             let storedHMAC = handle.readData(ofLength: StreamCryptor.hmacSize)
