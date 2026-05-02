@@ -16,9 +16,15 @@ enum EncryptionMode {
 
 struct HelperService {
 
+    /// Set to `true` while an encrypt/decrypt is running. The app's
+    /// `scenePhase` background handler checks this before wiping the temp
+    /// directory. Prevents deletion of temp files while in use
     static var isProcessing = false
 
     /// Removes all files from the app's temporary directory.
+    /// Should be called after every encrypt/decrypt and on app backgrounding so that
+    /// plaintext copies of files staged by `PhotosPicker` (and any other
+    /// scratch files) are removed between sessions.
     static func clearTemporaryDirectory() {
         let fileManager = FileManager.default
         let tmpURL = fileManager.temporaryDirectory

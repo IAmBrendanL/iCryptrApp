@@ -11,15 +11,19 @@ import CryptoKit
 import CommonCrypto
 
 /**
- Derieves an AES256 key from given password, salt, and rounds using Apple's open source CommonCrypto library
+ Derives raw key material from a password, salt, and round count using PBKDF2-HMAC-SHA256
+ (CommonCrypto). The output is `keySize` bytes of data. Can be used to derive an AES key 
+ and a HMAC key in one call
  - parameters:
  - passwd: The password from the user.
  - salt: A salt generated or from a file to decrypt.
  - rounds: A UInt32 signifying the number of rounds to run the key derivation algorithm. Use getKeyGenerationRounds
  to generate or get it from a file to decrypt.
+ - keySize: Total bytes of key material to produce. Defaults to a single AES-256 key.
  */
-func generateKeyFromPassword(_ passwd: String, _ salt: Data, _ rounds: UInt32) -> Data? {
-    var key = Data(count:kCCKeySizeAES256)
+func generateKeyFromPassword(_ passwd: String, _ salt: Data, _ rounds: UInt32,
+                             keySize: Int = kCCKeySizeAES256) -> Data? {
+    var key = Data(count: keySize)
     let saltString = salt.withUnsafeBytes { (ptr: UnsafeRawBufferPointer) -> String in
         return String(decoding: ptr.bindMemory(to: UInt8.self), as: UTF8.self)
     }
@@ -27,7 +31,7 @@ func generateKeyFromPassword(_ passwd: String, _ salt: Data, _ rounds: UInt32) -
         return CCKeyDerivationPBKDF(CCPBKDFAlgorithm(kCCPBKDF2), passwd,
                                     strlen(passwd), saltString, strlen(saltString),
                                     CCPseudoRandomAlgorithm(kCCPRFHmacAlgSHA256),
-                                    rounds, keyPtr, kCCKeySizeAES256)
+                                    rounds, keyPtr, keySize)
     }
     // if key derivation was successful
     if success == kCCSuccess {
@@ -53,7 +57,8 @@ func getKeyGenerationRounds(_ passwd: String, _ salt: Data) -> UInt32 {
 
 
 /**
- Generates an 8 byte cryptographically secure random salt.
+ Generates a 64-byte cryptographically secure random salt via `SecRandomCopyBytes`.
+ 64 bytes is overkill but cheap 
  */
 func generateSaltForKeyGeneration() -> Data? {
     let uint8Pointer = UnsafeMutablePointer<UInt8>.allocate(capacity: 64)
@@ -73,7 +78,11 @@ func generateSaltForKeyGeneration() -> Data? {
 
 
 /**
- Generates a cryptograpically secure random intitialization vector
+ Generates a cryptographically secure random initialization vector for AES-CBC.
+ Size is `kCCBlockSizeAES128` (16 bytes) becasuse AES has a 128-bit block size 
+ regardless of key length. Needed per file is what to allow key reuse across 
+ files; reusing an IV with the same key would leak whether two files start 
+ with the same plaintext block.
  */
 func generateIVForFileEncryption() -> Data? {
     let uint8Pointer = UnsafeMutablePointer<UInt8>.allocate(capacity: kCCBlockSizeAES128)
@@ -115,7 +124,7 @@ fileprivate func encryptDataWith(_ key: Data, _ iv: Data, _ plainData: Data) -> 
         iv.withUnsafeBytes { ivPtr in
             plainData.withUnsafeBytes { plainDataPtr in
                 cipherData.withUnsafeMutableBytes { cipherDataPtr in
-                    return CCCrypt(CCOperation(kCCEncrypt), CCAlgorithm(kCCAlgorithmAES128),
+                    return CCCrypt(CCOperation(kCCEncrypt), CCAlgorithm(kCCAlgorithmAES),
                                    CCOptions(kCCOptionPKCS7Padding), keyPtr.baseAddress, kCCKeySizeAES256,
                                    ivPtr.baseAddress, plainDataPtr.baseAddress, plainDataCount,
                                    cipherDataPtr.baseAddress, cipherDataCount, &numEncrypted)
@@ -148,7 +157,7 @@ fileprivate func decryptDataWith(_ key: Data, _ iv: Data, _ cipherData: Data) ->
         iv.withUnsafeBytes { ivPtr in
             cipherData.withUnsafeBytes { cipherDataPtr in
                 plainData.withUnsafeMutableBytes { plainDataPtr in
-                    return CCCrypt(CCOperation(kCCDecrypt), CCAlgorithm(kCCAlgorithmAES128),
+                    return CCCrypt(CCOperation(kCCDecrypt), CCAlgorithm(kCCAlgorithmAES),
                                    CCOptions(kCCOptionPKCS7Padding), keyPtr.baseAddress, kCCKeySizeAES256,
                                    ivPtr.baseAddress, cipherDataPtr.baseAddress, cipherData.count,
                                    plainDataPtr.baseAddress, plainDataCount, &numDecrypted)
