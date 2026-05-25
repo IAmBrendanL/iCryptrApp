@@ -1,5 +1,5 @@
 //
-//  HelperService.swift
+//  FileManagerService.swift
 //  iCryptr
 //
 //  Created by Brendan Lindsey on 6/7/20.
@@ -9,12 +9,9 @@
 import Foundation
 import CoreGraphics
 
-enum EncryptionMode {
-    case encrypt
-    case decrypt
-}
-
-struct HelperService {
+// TODO: consider whether to convert to a class and or singleton to handle the `isProcessing` flag
+/// Handles file management functions
+struct FileManagerService {
 
     /// Set to `true` while an encrypt/decrypt is running. The app's
     /// `scenePhase` background handler checks this before wiping the temp

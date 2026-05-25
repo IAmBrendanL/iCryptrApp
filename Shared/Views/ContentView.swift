@@ -16,15 +16,22 @@ struct ContentView: View {
     @State var presentFileImporter = false
     @State var presentEncryptionView = false
     @State private var showHelp = false
-    @State private var navPath = NavigationPath()
-    
+    @State private var isImporting = false
+    @State private var importProgress: Double = 0.0
+    @State private var importIsIndeterminate = false
+    @State private var importProgressObservation: NSKeyValueObservation? = nil
+
+    /// Handle file importer completion
     func fileImporterOnCompletion(result: Result<URL, Error>) {
-        if case .success(let url) = result {
+        switch result {
+        case .success(let url):
             pickedURL = url
             print("pickedURL: \(pickedURL!)")
+        case .failure(let error):
+            print("File import cancelled or failed:", error)
         }
     }
-    
+
     func handleButtonPress(for action: EncryptionMode) {
         if action == .encrypt {
             fileTypes = [.data]
@@ -34,49 +41,108 @@ struct ContentView: View {
         }
         presentFileImporter = true
     }
-    
+
+    /// Handle a picked photo. Get it ready for encryption
     func photoPickerCompletionHandler() {
         if pickedPhoto != nil {
             getPhotoURL(item: pickedPhoto!) { result in
                 switch result {
-                case .success(let photoURL):
-                    self.pickedURL = photoURL
-                case .failure(let failure):
-                    print("Failed to import item", failure)
-                    // TODO: Display import error
+                    case .success(let photoURL):
+                        self.pickedURL = photoURL
+                    case .failure(let failure):
+                        print("Failed to import item", failure)
+                        // TODO: Display an import error to user
                 }
+                self.pickedPhoto = nil
+                self.isImporting = false
             }
         }
     }
-    
-    
+
     // TODO: change this to swift concurrency
+    /// Converts a picked photo into a usable URL for encryption
+    /// - Parameters:
+    ///   - item: The picked item
+    ///   - completionHandler: a completion handler to handle the result
     func getPhotoURL(item: PhotosPickerItem, completionHandler: @escaping (_ result: Result<URL, Error>) -> Void) {
         // Step 1: Load as Data object.
-        item.loadTransferable(type: Data.self) { result in
+        let progress = item.loadTransferable(type: Data.self) { result in
+            DispatchQueue.main.async {
+                importProgressObservation?.invalidate()
+                importProgressObservation = nil
+            }
             switch result {
             case .success(let data):
-                if let contentType = item.supportedContentTypes.first {
-                    // Step 2: make the URL file name and a get a file extention.
-                    let directory = FileManager.default.temporaryDirectory
-                    let url = directory.appendingPathComponent("\(UUID().uuidString).\(contentType.preferredFilenameExtension ?? "")")
-                    if let data = data {
-                        do {
-                            // Step 3: write to temp App file directory and return in completionHandler
-                            try data.write(to: url)
-                            completionHandler(.success(url))
-                        } catch {
-                            completionHandler(.failure(error))
-                        }
-                    }
+                guard let contentType = item.supportedContentTypes.first else {
+                    completionHandler(.failure(PhotoImportError.noContentType))
+                    return
+                }
+                guard let data = data else {
+                    completionHandler(.failure(PhotoImportError.noData))
+                    return
+                }
+                // Step 2: make the URL file name and a get a file extention.
+                let directory = FileManager.default.temporaryDirectory
+                let url = directory.appendingPathComponent("\(UUID().uuidString).\(contentType.preferredFilenameExtension ?? "")")
+                do {
+                    // Step 3: write to temp App file directory and return in completionHandler
+                    try data.write(to: url)
+                    completionHandler(.success(url))
+                } catch {
+                    completionHandler(.failure(error))
                 }
             case .failure(let failure):
                 completionHandler(.failure(failure))
             }
         }
+        // On the main thread, observe progress
+        DispatchQueue.main.async {
+            self.importProgress = progress.fractionCompleted
+            self.importIsIndeterminate = (progress.totalUnitCount <= 0)
+            guard !progress.isFinished else { return }
+            self.importProgressObservation = progress.observe(\.fractionCompleted, options: [.new, .initial]) { prog, _ in
+                DispatchQueue.main.async {
+                    self.importProgress = prog.fractionCompleted
+                    self.importIsIndeterminate = (prog.totalUnitCount <= 0)
+                }
+            }
+        }
     }
     
-    
+    /// Encapsulates the import overlay
+    @ViewBuilder
+    private var importingOverlay: some View {
+        ZStack {
+            Color.black.opacity(0.8)
+                .ignoresSafeArea()
+            Group {
+                if importIsIndeterminate {
+                    ProgressView {
+                        Text("Importing…")
+                            .font(.title2)
+                            .foregroundColor(.white)
+                    }
+                    .controlSize(.large)
+                    .scaleEffect(1.5)
+                } else {
+                    VStack(spacing: 16) {
+                        Text("Importing…")
+                            .font(.largeTitle)
+                            .foregroundColor(.white)
+                        ProgressView(value: importProgress, total: 1.0)
+                            .frame(width: 240)
+                        Text("\(Int(importProgress * 100))%")
+                            .font(.title)
+                            .foregroundColor(.white)
+                    }
+                    .scaledToFit()
+                }
+            }
+            .tint(.white)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -111,8 +177,12 @@ struct ContentView: View {
                         }
                     )
                 }
+                .disabled(isImporting)
                 .onChange(of: pickedPhoto) {
                     if pickedPhoto != nil {
+                        importProgress = 0.0
+                        importIsIndeterminate = true // start with activity indicator
+                        isImporting = true
                         photoPickerCompletionHandler()
                     }
                 }
@@ -123,26 +193,23 @@ struct ContentView: View {
                 }
                 .fileImporter(isPresented: $presentFileImporter, allowedContentTypes: fileTypes, onCompletion: fileImporterOnCompletion)
                 .toolbar {
-                    Button(action: { showHelp = true }) { 
+                    Button(action: { showHelp = true }) {
                         Text("?")
-                            .foregroundColor(Color.black)
                             .font(.title)
-                            .padding(10)
-                            .background(
-                                Circle().stroke(.black, lineWidth: 2)
-                                    .background(Color.white).cornerRadius(20)
-                                    .opacity(0.5)
-                            )
                     }
+                    .disabled(isImporting)
                 }
                 .sheet(isPresented: $showHelp) {
                     HelpView()
                 }
+                if isImporting {
+                    importingOverlay
+                }
             }
             .navigationDestination(isPresented: $presentEncryptionView) {
                 EncryptActionView(fileURL: $pickedURL)
-                    .onAppear() {
-                        self.pickedPhoto = nil // reset if a photo was selected
+                    .onDisappear {
+                        pickedURL = nil    // allow the next picked URL to re-trigger navigation
                     }
             }
             .navigationTitle("iCryptr")

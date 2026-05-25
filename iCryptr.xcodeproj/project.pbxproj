@@ -19,15 +19,17 @@
 		C689E93E26CC9A4F00DCE7BD /* EncryptionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C689E93A26CC9A4F00DCE7BD /* EncryptionService.swift */; };
 		C689E93F26CC9A4F00DCE7BD /* StreamCryptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C689E93B26CC9A4F00DCE7BD /* StreamCryptor.swift */; };
 		C689E94026CC9A4F00DCE7BD /* StreamCryptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C689E93B26CC9A4F00DCE7BD /* StreamCryptor.swift */; };
-		C689E94126CC9A4F00DCE7BD /* HelperService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C689E93C26CC9A4F00DCE7BD /* HelperService.swift */; };
-		C689E94226CC9A4F00DCE7BD /* HelperService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C689E93C26CC9A4F00DCE7BD /* HelperService.swift */; };
+		C689E94126CC9A4F00DCE7BD /* FileManagerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C689E93C26CC9A4F00DCE7BD /* FileManagerService.swift */; };
+		C689E94226CC9A4F00DCE7BD /* FileManagerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C689E93C26CC9A4F00DCE7BD /* FileManagerService.swift */; };
 		C689E94B26CC9AAD00DCE7BD /* EncryptActionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C689E94526CC9AAD00DCE7BD /* EncryptActionView.swift */; };
 		C689E94C26CC9AAD00DCE7BD /* EncryptActionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C689E94526CC9AAD00DCE7BD /* EncryptActionView.swift */; };
 		C6AE47462BB272F9004635D5 /* QuickLookThumbnailing.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C6AE47452BB272F9004635D5 /* QuickLookThumbnailing.framework */; };
 		C6AE47492BB272F9004635D5 /* ThumbnailProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6AE47482BB272F9004635D5 /* ThumbnailProvider.swift */; };
 		C6AE474D2BB272F9004635D5 /* ThumbnailProvider.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = C6AE47432BB272F9004635D5 /* ThumbnailProvider.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		C6BD9D032FC21D5E009D0A41 /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6BD9D022FC21D47009D0A41 /* Helpers.swift */; };
+		C6BD9D042FC21D5E009D0A41 /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6BD9D022FC21D47009D0A41 /* Helpers.swift */; };
 		C6D398B3281DDFFA00384F8E /* test.txt in Resources */ = {isa = PBXBuildFile; fileRef = C6D398B2281DDFFA00384F8E /* test.txt */; };
-		C6D398B5281DE0D100384F8E /* HelperService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C689E93C26CC9A4F00DCE7BD /* HelperService.swift */; };
+		C6D398B5281DE0D100384F8E /* FileManagerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C689E93C26CC9A4F00DCE7BD /* FileManagerService.swift */; };
 		C6D398B6281DE0D100384F8E /* StreamCryptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C689E93B26CC9A4F00DCE7BD /* StreamCryptor.swift */; };
 		C6D398B7281DE0D400384F8E /* EncryptionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C689E93A26CC9A4F00DCE7BD /* EncryptionService.swift */; };
 		C6D398B9281E5F6D00384F8E /* Extentions.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6D398B8281E5F6D00384F8E /* Extentions.swift */; };
@@ -95,12 +97,13 @@
 		C689E91B26CC99C700DCE7BD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C689E93A26CC9A4F00DCE7BD /* EncryptionService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EncryptionService.swift; sourceTree = "<group>"; };
 		C689E93B26CC9A4F00DCE7BD /* StreamCryptor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StreamCryptor.swift; sourceTree = "<group>"; };
-		C689E93C26CC9A4F00DCE7BD /* HelperService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HelperService.swift; sourceTree = "<group>"; };
+		C689E93C26CC9A4F00DCE7BD /* FileManagerService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileManagerService.swift; sourceTree = "<group>"; };
 		C689E94526CC9AAD00DCE7BD /* EncryptActionView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EncryptActionView.swift; sourceTree = "<group>"; };
 		C6AE47432BB272F9004635D5 /* ThumbnailProvider.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ThumbnailProvider.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		C6AE47452BB272F9004635D5 /* QuickLookThumbnailing.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickLookThumbnailing.framework; path = System/Library/Frameworks/QuickLookThumbnailing.framework; sourceTree = SDKROOT; };
 		C6AE47482BB272F9004635D5 /* ThumbnailProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThumbnailProvider.swift; sourceTree = "<group>"; };
 		C6AE474A2BB272F9004635D5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		C6BD9D022FC21D47009D0A41 /* Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
 		C6D398B2281DDFFA00384F8E /* test.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = test.txt; sourceTree = "<group>"; };
 		C6D398B8281E5F6D00384F8E /* Extentions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extentions.swift; sourceTree = "<group>"; };
 		C6DF69692D7E51050098A845 /* ErrorTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorTextField.swift; sourceTree = "<group>"; };
@@ -174,10 +177,10 @@
 			isa = PBXGroup;
 			children = (
 				C67C934C2A43C1BC003B7D7E /* Models */,
-				C6EC5F7526D307A800244A3D /* Controller */,
 				C689E94F26CC9ABD00DCE7BD /* Views */,
 				C689E93026CC9A0D00DCE7BD /* Services */,
 				C689E8F326CC99C700DCE7BD /* iCryptrApp.swift */,
+				C6BD9D022FC21D47009D0A41 /* Helpers.swift */,
 				C689E8F526CC99C700DCE7BD /* Assets.xcassets */,
 			);
 			path = Shared;
@@ -235,7 +238,7 @@
 			isa = PBXGroup;
 			children = (
 				C689E93A26CC9A4F00DCE7BD /* EncryptionService.swift */,
-				C689E93C26CC9A4F00DCE7BD /* HelperService.swift */,
+				C689E93C26CC9A4F00DCE7BD /* FileManagerService.swift */,
 				C6D398B8281E5F6D00384F8E /* Extentions.swift */,
 			);
 			path = Services;
@@ -268,13 +271,6 @@
 				C6AE474A2BB272F9004635D5 /* Info.plist */,
 			);
 			path = ThumbnailProvider;
-			sourceTree = "<group>";
-		};
-		C6EC5F7526D307A800244A3D /* Controller */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Controller;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -470,7 +466,8 @@
 				C6DF696B2D7E51050098A845 /* ErrorTextField.swift in Sources */,
 				C689E91E26CC99C700DCE7BD /* ContentView.swift in Sources */,
 				C6DF696D2D7E783B0098A845 /* HelpView.swift in Sources */,
-				C689E94126CC9A4F00DCE7BD /* HelperService.swift in Sources */,
+				C6BD9D042FC21D5E009D0A41 /* Helpers.swift in Sources */,
+				C689E94126CC9A4F00DCE7BD /* FileManagerService.swift in Sources */,
 				C689E93F26CC9A4F00DCE7BD /* StreamCryptor.swift in Sources */,
 				C689E91C26CC99C700DCE7BD /* iCryptrApp.swift in Sources */,
 				C6D398B9281E5F6D00384F8E /* Extentions.swift in Sources */,
@@ -486,7 +483,8 @@
 				C689E94C26CC9AAD00DCE7BD /* EncryptActionView.swift in Sources */,
 				C689E91F26CC99C700DCE7BD /* ContentView.swift in Sources */,
 				C6DF696A2D7E51050098A845 /* ErrorTextField.swift in Sources */,
-				C689E94226CC9A4F00DCE7BD /* HelperService.swift in Sources */,
+				C6BD9D032FC21D5E009D0A41 /* Helpers.swift in Sources */,
+				C689E94226CC9A4F00DCE7BD /* FileManagerService.swift in Sources */,
 				C6DF696E2D7E783B0098A845 /* HelpView.swift in Sources */,
 				C689E94026CC9A4F00DCE7BD /* StreamCryptor.swift in Sources */,
 				C689E91D26CC99C700DCE7BD /* iCryptrApp.swift in Sources */,
@@ -503,7 +501,7 @@
 				C689E90F26CC99C700DCE7BD /* Tests_iOS.swift in Sources */,
 				C6D398BA281E5F6D00384F8E /* Extentions.swift in Sources */,
 				C6D398B6281DE0D100384F8E /* StreamCryptor.swift in Sources */,
-				C6D398B5281DE0D100384F8E /* HelperService.swift in Sources */,
+				C6D398B5281DE0D100384F8E /* FileManagerService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

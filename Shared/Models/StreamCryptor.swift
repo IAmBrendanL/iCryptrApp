@@ -107,7 +107,7 @@ class StreamCryptor {
         guard name != nil else { return nil }
         let fileManager = FileManager.default
         
-        if let outputLocation = HelperService.getOutputPathInDocumentsDirectory(named: name!, withExtension: fileExtension) {
+        if let outputLocation = FileManagerService.getOutputPathInDocumentsDirectory(named: name!, withExtension: fileExtension) {
             if !fileManager.fileExists(atPath: outputLocation.path) {
                 fileManager.createFile(atPath: outputLocation.path, contents: nil, attributes: nil)
             }

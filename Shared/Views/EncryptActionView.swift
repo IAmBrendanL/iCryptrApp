@@ -77,13 +77,12 @@ struct EncryptActionView: View {
         // It is cleared in the `defer` below so an early return or thrown
         // error from StreamCryptor wont leave the app unable to clean up its 
         // temp files until the next cold start.
-        HelperService.isProcessing = true
+        FileManagerService.isProcessing = true
         encryptionStatus = .inProgress
-        NSLog("Starting Encryption")
         Task(priority: .userInitiated) {
             defer {
-                HelperService.isProcessing = false
-                HelperService.clearTemporaryDirectory()
+                FileManagerService.isProcessing = false
+                FileManagerService.clearTemporaryDirectory()
             }
             /* Stream Cryptor Implementation */
             let cryptor = try? StreamCryptor(fileLoc: fileURL!, forOperation: encryptionMode, withPassword: encryptionPassword)
