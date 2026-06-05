@@ -6,9 +6,6 @@
 //  tampering with any byte of an .icryptr file (header or ciphertext) and
 //  rejects wrong passwords before any plaintext is written.
 //
-//  IMPORTANT: This file must live in a *unit-test* target with
-//  `@testable import iCryptr`. The existing "Tests iOS"/"Tests macOS"
-//  targets are UI-testing bundles and cannot link the app's symbols.
 //
 
 import XCTest
@@ -94,22 +91,36 @@ final class StreamCryptorHMACTests: XCTestCase {
                      "flipped ciphertext byte must be rejected by HMAC")
     }
 
-    /// IV lives at offsets 68..84. Flipping a bit there would otherwise just
-    /// produce wrong plaintext for the first CBC block — the value of this
-    /// test is confirming the HMAC covers the *header*, not just the body.
-    func testTamperedIVRejected() throws {
+    /// Filename IV lives at offsets 68..84 (immediately after the salt).
+    /// Flipping a bit here would otherwise corrupt the first CBC block of the
+    /// encrypted filename — the value of this test is confirming the HMAC
+    /// covers the *header*, not just the body.
+    func testTamperedNameIVRejected() throws {
         let plaintextURL = try makePlaintext(Data("hello world".utf8))
-        let encryptedURL = try encrypt(plaintextURL, outputBase: "iv-out")
+        let encryptedURL = try encrypt(plaintextURL, outputBase: "niv-out")
 
-        try flipBit(at: 70, in: encryptedURL)   // mid-IV
+        try flipBit(at: 70, in: encryptedURL)   // mid-nameIV
 
         XCTAssertNil(attemptDecrypt(encryptedURL, password: password),
-                     "flipped IV byte must be rejected by HMAC")
+                     "flipped filename-IV byte must be rejected by HMAC")
     }
 
-    /// Salt lives at offsets 4..68. Flipping the salt also derives a different
-    /// key on decrypt, so this is doubly-rejected — but the HMAC catches it
-    /// first, which is what we care about.
+    /// File-body IV moved past the encrypted-name region. For an input named
+    /// `plain.bin` (9 bytes) the PKCS7-padded encrypted name is 16 bytes, so
+    /// the body IV starts at offset 4 + 64 + 16 + 2 + 16 = 102 (mid-IV ≈ 110).
+    func testTamperedBodyIVRejected() throws {
+        let plaintextURL = try makePlaintext(Data("hello world".utf8))
+        let encryptedURL = try encrypt(plaintextURL, outputBase: "biv-out")
+
+        try flipBit(at: 110, in: encryptedURL)   // inside file-body IV
+
+        XCTAssertNil(attemptDecrypt(encryptedURL, password: password),
+                     "flipped body-IV byte must be rejected by HMAC")
+    }
+
+    /// Salt lives at offsets 4..68 (unchanged). Flipping the salt also derives
+    /// a different key on decrypt, so this is doubly-rejected — but the HMAC
+    /// catches it first, which is what we care about.
     func testTamperedSaltRejected() throws {
         let plaintextURL = try makePlaintext(Data("hello world".utf8))
         let encryptedURL = try encrypt(plaintextURL, outputBase: "salt-out")
@@ -118,6 +129,33 @@ final class StreamCryptorHMACTests: XCTestCase {
 
         XCTAssertNil(attemptDecrypt(encryptedURL, password: password),
                      "flipped salt byte must be rejected")
+    }
+
+    /// Flipping a byte inside the encrypted-filename region (offset 86, just
+    /// past name length) must be detected by HMAC, even though that region is
+    /// also ciphertext that decrypts to a plausible-looking name.
+    func testTamperedEncryptedNameRejected() throws {
+        let plaintextURL = try makePlaintext(Data("hello world".utf8))
+        let encryptedURL = try encrypt(plaintextURL, outputBase: "name-out")
+
+        try flipBit(at: 88, in: encryptedURL)   // inside encrypted-name region
+
+        XCTAssertNil(attemptDecrypt(encryptedURL, password: password),
+                     "flipped encrypted-filename byte must be rejected by HMAC")
+    }
+
+    /// The original filename must not appear in cleartext anywhere in the
+    /// encrypted file. This is the core privacy guarantee of the format
+    /// change — the name is now ciphertext, not plaintext header data.
+    func testFilenameNotInCleartext() throws {
+        let secretName = "secret-leak-marker-\(UUID().uuidString).txt"
+        let plaintextURL = try makePlaintext(Data("payload".utf8), name: secretName)
+        let encryptedURL = try encrypt(plaintextURL, outputBase: "privacy-out")
+
+        let encryptedBytes = try Data(contentsOf: encryptedURL)
+        let nameBytes = Data(secretName.utf8)
+        XCTAssertNil(encryptedBytes.range(of: nameBytes),
+                     "original filename must not appear in cleartext in encrypted output")
     }
 
     /// Truncating the file shortens the HMAC tag (or removes ciphertext that

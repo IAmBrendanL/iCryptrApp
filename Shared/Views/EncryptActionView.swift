@@ -36,11 +36,19 @@ struct EncryptActionView: View {
     
     // MARK: - Computed Properties
     var fileName: String {
-        return fileURL?.deletingPathExtension().lastPathComponent ?? "FilleNameMissing"
+        return fileURL?.deletingPathExtension().lastPathComponent ?? "Unknown File"
     }
-    
+
     var encryptionMode: EncryptionMode {
-        return fileURL?.pathExtension == "iCryptr" ? .decrypt : .encrypt
+        return fileURL?.pathExtension.lowercased() == "icryptr" ? .decrypt : .encrypt
+    }
+
+    /// The original file name reduced to the characters allowed by `validateFileName()`,
+    /// used to pre-fill the rename field so the user has a nicer starting point.
+    private var sanitizedDefaultName: String {
+        let allowedChars = Set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")
+        let mapped = fileName.map { allowedChars.contains($0) ? $0 : "_" }
+        return String(mapped)
     }
 
     var viewFileButtonLabel: String {
@@ -156,6 +164,11 @@ struct EncryptActionView: View {
     var body: some View {
         ZStack {
             Color.gray.edgesIgnoringSafeArea(.all)
+                .onAppear {
+                    if encryptionMode == .encrypt && newFileName.isEmpty {
+                        newFileName = sanitizedDefaultName
+                    }
+                }
             ZStack {
                 VStack {
                     if fileURL != nil { // TODO: make the thumbnail for the iCryptr filetype

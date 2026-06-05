@@ -42,14 +42,21 @@ All shared app logic lives in `Shared/`. Platform-specific targets (`iOS/`, `mac
 ### Custom `.icryptr` File Format
 
 ```
+[4 bytes]   Magic header ("iCR" + version byte 0x01)
 [64 bytes]  Salt
-[16 bytes]  Initialization Vector (IV)
-[2 bytes]   Original filename length (UInt16, big-endian)
-[n bytes]   Original filename (UTF-8, unencrypted)
+--- filename group ---
+[16 bytes]  Filename IV (AES-CBC IV for the encrypted name)
+[2 bytes]   Encrypted-filename length (UInt16, host byte order)
+[n bytes]   Encrypted filename + extension (AES-256-CBC + PKCS#7)
+--- file-body group ---
+[16 bytes]  File-body IV (AES-CBC IV for the body)
 [...]       AES-256-CBC encrypted file data
+[32 bytes]  HMAC-SHA256 tag covering everything before it
 ```
 
-The original filename is stored in plaintext in the header so `StreamCryptor` can restore the correct name and extension on decryption.
+The filename is encrypted with the same AES key as the body but a distinct IV
+(to avoid CBC IV reuse) so the original name does not leak on disk. See
+`FILE_FORMAT.md` for the full byte-level specification.
 
 ### View Layer
 

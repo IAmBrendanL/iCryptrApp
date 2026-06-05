@@ -31,6 +31,7 @@ private extension Image {
 struct ThumbnailView: View {
     let fileURL: URL
     @State private var thumbnail: PlatformImage?
+    @State private var isGenerating = true
     
     /// Generates thumbnails for images using the correct library for macOS or iOS 
     /// - Returns: an Image or nil if the thumbnail could not be generated
@@ -74,15 +75,23 @@ struct ThumbnailView: View {
                     .aspectRatio(contentMode: .fit)
                     .cornerRadius(10)
                     .shadow(radius: 3)
-            } else {
+            } else if isGenerating {
                 ProgressView()
                     .scaleEffect(1.5)
+                    .padding()
+            } else { // default image fallback
+                Image(systemName: "document.fill")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(maxWidth: 120, maxHeight: 120)
+                    .foregroundStyle(.white)
                     .padding()
             }
         }
         .onAppear {
             Task {
                 thumbnail = await generateThumbnail()
+                isGenerating = false
             }
         }
     }

@@ -19,11 +19,14 @@ struct CryptoError: Error {
 /// Holds unpacked data from an encrypted file for use when decrypting the file.
 /// `fileDataOffset` is where ciphertext begins (just past the header); `storedHMAC`
 /// is the trailing 32-byte tag that authenticates everything before it.
+/// `encryptedNameData` is the raw AES-CBC ciphertext of the original filename;
+/// the caller decrypts it after key derivation using `nameIV`.
 /// See FILE_FORMAT.md for the full byte layout.
 struct UnpackedFile {
     let iv: Data
+    let nameIV: Data
     let salt: Data
-    let fileNameAndTypeData: String
+    let encryptedNameData: Data
     let fileDataOffset: UInt64
     let storedHMAC: Data
 }
@@ -40,12 +43,14 @@ class StreamCryptor {
     private var buffer = Data()
     private var outputLocation: URL?
     private var iv: Data
+    private var nameIV: Data
     private var salt: Data
     private var fileOffset: UInt64 = 0
     private var fileNameAndTypeData: String? = nil
     // AES key and HMAC key are derived together from one PBKDF2 call (see init)
     // and must be kept distinct — reusing the AES key as a MAC key would void
     // the security argument for encrypt-then-MAC.
+    private var aesKey: Data?
     private var hmacKey: Data?
     private var storedHMAC: Data?
     
@@ -53,30 +58,46 @@ class StreamCryptor {
     public init(fileLoc: URL, forOperation: EncryptionMode, withPassword password: String, withNewName newName: String? = nil ) throws {
         self.inFileLocation = fileLoc
         self.operation = forOperation == .encrypt ? CCOperation(kCCEncrypt) : CCOperation(kCCDecrypt)
+        var encryptedNameData: Data? = nil
         if forOperation == .encrypt {
             guard let salt = generateSaltForKeyGeneration() else { throw CryptoError(status: CCStatus(kCCUnspecifiedError))}
+            // name and file IVs must be different to prevent leading bytes leak
             guard let iv = generateIVForFileEncryption() else {throw CryptoError(status: CCStatus(kCCUnspecifiedError))}
+            guard let nameIV = generateIVForFileEncryption() else {throw CryptoError(status: CCStatus(kCCUnspecifiedError))}
             self.salt = salt
             self.iv = iv
+            self.nameIV = nameIV
         } else {
             // stop the compiler from yelling at me that I'm calling a method before everything is initialized.
             self.salt = Data()
             self.iv = Data()
+            self.nameIV = Data()
             guard let unpackedFile = unpackEncryptedFile(atLocation: fileLoc) else { throw CryptoError(status: CCStatus(kCCUnspecifiedError))}
             self.salt = unpackedFile.salt
             self.iv = unpackedFile.iv
+            self.nameIV = unpackedFile.nameIV
             self.fileOffset = unpackedFile.fileDataOffset
-            self.fileNameAndTypeData = unpackedFile.fileNameAndTypeData
             self.storedHMAC = unpackedFile.storedHMAC
+            encryptedNameData = unpackedFile.encryptedNameData
         }
         // This generates both the AES key and the HMAC key by doubling the key size target
-        guard let keyMaterial = generateKeyFromPassword(password, salt, 750000,
+        guard let keyMaterial = generateKeyFromPassword(password, self.salt, 750000,
                                                         keySize: kCCKeySizeAES256 * 2)
         else { throw CryptoError(status: CCStatus(kCCUnspecifiedError)) }
         let aesKey = Data(keyMaterial.prefix(kCCKeySizeAES256))
+        self.aesKey = aesKey
         self.hmacKey = Data(keyMaterial.suffix(kCCKeySizeAES256))
+
+        // if decrypting recover the original filename now that we have the AES key.
+        if forOperation == .decrypt, let encryptedNameData = encryptedNameData {
+            if let decryptedName = StreamCryptor.cryptFilenameBlob(encryptedNameData, operation: CCOperation(kCCDecrypt), key: aesKey, iv: self.nameIV),
+               let nameString = String(data: decryptedName, encoding: .utf8) {
+                self.fileNameAndTypeData = nameString
+            }
+        }
+
         aesKey.withUnsafeBytes { keyPtr in
-            iv.withUnsafeBytes { ivPtr in
+            self.iv.withUnsafeBytes { ivPtr in
                 let status = CCCryptorCreate(operation, CCAlgorithm(kCCAlgorithmAES),
                                              CCOptions(kCCOptionPKCS7Padding),
                                              keyPtr.baseAddress, aesKey.count,
@@ -84,11 +105,11 @@ class StreamCryptor {
                 self.status = status
             }
         }
-        
+
         if self.status != kCCSuccess {
             throw CryptoError(status: status)
         }
-        
+
     }
     
     /// Gets the output file URL. It makes certain to
@@ -274,22 +295,30 @@ class StreamCryptor {
     }
     
     /// Pack new file with data for later decryption.
-    /// Header layout (see FILE_FORMAT.md): magic(4) | salt(64) | iv(16) |
-    /// nameLen(2) | name(nameLen). The filename is stored in plaintext —
-    /// `StreamCryptor` needs it to restore the original name + extension on
-    /// decryption, and the HMAC tag still authenticates it against tampering.
+    /// Header layout (see FILE_FORMAT.md): magic(4) | salt(64) | nameIV(16) |
+    /// nameLen(2) | encryptedName(nameLen) | iv(16). The filename is encrypted
+    /// with the same AES key as the body but a distinct IV (`nameIV`) to avoid
+    /// CBC IV reuse under one key. The HMAC tag will cover the header and data.
     /// - Returns: the header bytes written, returned so the caller can feed
-    ///   them into the HMAC context (the tag covers the header too).
+    ///   them into the HMAC.
     @discardableResult
     private func packFile(into handle: FileHandle, preEncryptionNameAndExtension: String) throws -> Data {
         guard let fileNameAndExtension = preEncryptionNameAndExtension.data(using: .utf8) else {
             throw CryptoError(status: CCStatus(kCCUnspecifiedError))
         }
-        // since .utf8 takes 1-4 bytes per character using a UInt16 puts the upper lim at ~16k characters. I'd use a UInt8 but that would leave a max of 63 characters which could reasonably be exceeded by a filename + extension. Calculated with max_size/4
-        var length = UInt16(fileNameAndExtension.count)
+        guard let aesKey = self.aesKey else {
+            throw CryptoError(status: CCStatus(kCCUnspecifiedError))
+        }
+        guard let encryptedName = StreamCryptor.cryptFilenameBlob(fileNameAndExtension, operation: CCOperation(kCCEncrypt), key: aesKey, iv: self.nameIV) else {
+            throw CryptoError(status: CCStatus(kCCUnspecifiedError))
+        }
+        // UInt16 holds the *ciphertext* length. PKCS7 padding adds at most
+        // one block (16 bytes) over the plaintext name, so the original
+        // ~16k-character upper bound is unaffected.
+        var length = UInt16(encryptedName.count)
         let lengthData = Data(bytes: &length, count: MemoryLayout<UInt16>.size)
         var header = Data(StreamCryptor.magicV1)
-        for dataItem in [self.salt, self.iv, lengthData, fileNameAndExtension] {
+        for dataItem in [self.salt, self.nameIV, lengthData, encryptedName, self.iv] {
             header.append(dataItem)
         }
         handle.write(header)
@@ -301,11 +330,13 @@ class StreamCryptor {
     /// - Parameter fileLocation : the location of the file to unpack
     /// - Returns: a struct with all the unpacked data
     private func unpackEncryptedFile(atLocation fileLocation: URL) -> UnpackedFile? {
-        guard fileLocation.startAccessingSecurityScopedResource() else {
-            return nil
-        }
+        // `startAccessingSecurityScopedResource()` returns false for any URL
+        // not created from a security-scoped bookmark (e.g. files in the
+        // app's own Documents dir). Only call `stop` if `start` actually
+        // granted access
+        let didStartAccess = fileLocation.startAccessingSecurityScopedResource()
         defer {
-            fileLocation.stopAccessingSecurityScopedResource()
+            if didStartAccess { fileLocation.stopAccessingSecurityScopedResource() }
         }
         do {
             let handle = try FileHandle(forReadingFrom: fileLocation)
@@ -315,8 +346,11 @@ class StreamCryptor {
             // Verify magic header — reject anything that isn't an iCryptr file.
             let magic = handle.readData(ofLength: 4)
             guard magic == Data(StreamCryptor.magicV1) else { return nil }
+            // Grouped read order: filename fields first (salt, nameIV, name
+            // length, encrypted name), then file-body fields (body IV). The
+            // body ciphertext starts at the offset captured after the body IV.
             let salt = handle.readData(ofLength: 64)
-            let iv = handle.readData(ofLength: kCCBlockSizeAES128)
+            let nameIV = handle.readData(ofLength: kCCBlockSizeAES128)
             guard let fileNameAndTypeLenData = try handle.read(upToCount: 2) else {
                 return nil
             }
@@ -324,16 +358,17 @@ class StreamCryptor {
             let fileNameAndTypeLen = try fileNameAndTypeLenData.withUnsafeBytes<UInt16>() { rawPtr -> UInt16 in
                 return rawPtr.load(as: UInt16.self)
             }
-            guard let rawFileNameAndTypeData = try handle.read(upToCount: Int(fileNameAndTypeLen)) else {
+            guard let encryptedNameData = try handle.read(upToCount: Int(fileNameAndTypeLen)) else {
                 return nil
             }
-            let fileNameAndTypeData = String(decoding: rawFileNameAndTypeData, as: UTF8.self)
+            let iv = handle.readData(ofLength: kCCBlockSizeAES128)
             let fileDataOffset = try handle.offset()
             // Read HMAC tag from the last 32 bytes
             let fileSize = handle.seekToEndOfFile()
             try handle.seek(toOffset: fileSize - UInt64(StreamCryptor.hmacSize))
             let storedHMAC = handle.readData(ofLength: StreamCryptor.hmacSize)
-            return UnpackedFile(iv: iv, salt: salt, fileNameAndTypeData: fileNameAndTypeData,
+            return UnpackedFile(iv: iv, nameIV: nameIV, salt: salt,
+                                encryptedNameData: encryptedNameData,
                                 fileDataOffset: fileDataOffset, storedHMAC: storedHMAC)
 
         } catch {
@@ -341,6 +376,33 @@ class StreamCryptor {
             return nil
         }
 
+    }
+
+    /// One-shot AES-256-CBC + PKCS7 transform of the filename blob. Kept
+    /// local to `StreamCryptor` so the engine is self-contained — the
+    /// analogous helpers in `EncryptionService.swift` are `fileprivate` and
+    /// deprecated.
+    private static func cryptFilenameBlob(_ input: Data, operation: CCOperation, key: Data, iv: Data) -> Data? {
+        var numBytes = 0
+        var output = Data(count: input.count + kCCBlockSizeAES128)
+        let outputCapacity = output.count
+        let status = key.withUnsafeBytes { keyPtr in
+            iv.withUnsafeBytes { ivPtr in
+                input.withUnsafeBytes { inPtr in
+                    output.withUnsafeMutableBytes { outPtr in
+                        CCCrypt(operation, CCAlgorithm(kCCAlgorithmAES),
+                                CCOptions(kCCOptionPKCS7Padding),
+                                keyPtr.baseAddress, kCCKeySizeAES256,
+                                ivPtr.baseAddress,
+                                inPtr.baseAddress, input.count,
+                                outPtr.baseAddress, outputCapacity, &numBytes)
+                    }
+                }
+            }
+        }
+        guard status == kCCSuccess else { return nil }
+        output.count = numBytes
+        return output
     }
 }
 

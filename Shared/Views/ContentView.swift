@@ -8,6 +8,7 @@
 import SwiftUI
 import UniformTypeIdentifiers
 import PhotosUI
+import os.log
 
 struct ContentView: View {
     @State var pickedURL: URL?
@@ -26,9 +27,11 @@ struct ContentView: View {
         switch result {
         case .success(let url):
             pickedURL = url
-            print("pickedURL: \(pickedURL!)")
         case .failure(let error):
-            print("File import cancelled or failed:", error)
+            // Log only domain+code — the error's description can embed the source
+            // file's plaintext path/name, which this app deliberately keeps off disk.
+            let nsError = error as NSError
+            os_log("File import cancelled or failed: %{public}@ (%ld)", type: .error, nsError.domain, nsError.code)
         }
     }
 
@@ -50,7 +53,7 @@ struct ContentView: View {
                     case .success(let photoURL):
                         self.pickedURL = photoURL
                     case .failure(let failure):
-                        print("Failed to import item", failure)
+                        os_log("Failed to import item: %{public}@", type: .error, String(describing: failure))
                         // TODO: Display an import error to user
                 }
                 self.pickedPhoto = nil

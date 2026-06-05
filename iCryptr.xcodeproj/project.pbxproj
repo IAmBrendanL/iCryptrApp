@@ -28,6 +28,7 @@
 		C6AE474D2BB272F9004635D5 /* ThumbnailProvider.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = C6AE47432BB272F9004635D5 /* ThumbnailProvider.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		C6BD9D032FC21D5E009D0A41 /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6BD9D022FC21D47009D0A41 /* Helpers.swift */; };
 		C6BD9D042FC21D5E009D0A41 /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6BD9D022FC21D47009D0A41 /* Helpers.swift */; };
+		AAAAAAAA000000000000000A /* StreamCryptorHMACTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6BD9D052FC74A6E009D0A41 /* StreamCryptorHMACTests.swift */; };
 		C6D398B3281DDFFA00384F8E /* test.txt in Resources */ = {isa = PBXBuildFile; fileRef = C6D398B2281DDFFA00384F8E /* test.txt */; };
 		C6D398B5281DE0D100384F8E /* FileManagerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C689E93C26CC9A4F00DCE7BD /* FileManagerService.swift */; };
 		C6D398B6281DE0D100384F8E /* StreamCryptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C689E93B26CC9A4F00DCE7BD /* StreamCryptor.swift */; };
@@ -63,6 +64,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = C6AE47422BB272F9004635D5;
 			remoteInfo = ThumbnailProvider;
+		};
+		AAAAAAAA0000000000000009 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C689E8EE26CC99C600DCE7BD /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C689E90126CC99C700DCE7BD;
+			remoteInfo = "iCryptr (macOS)";
 		};
 /* End PBXContainerItemProxy section */
 
@@ -104,6 +112,9 @@
 		C6AE47482BB272F9004635D5 /* ThumbnailProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThumbnailProvider.swift; sourceTree = "<group>"; };
 		C6AE474A2BB272F9004635D5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C6BD9D022FC21D47009D0A41 /* Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
+		C6BD9D052FC74A6E009D0A41 /* StreamCryptorHMACTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamCryptorHMACTests.swift; sourceTree = "<group>"; };
+		AAAAAAAA000000000000000B /* iCryptrTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = iCryptrTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		AAAAAAAA000000000000000C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C6D398B2281DDFFA00384F8E /* test.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = test.txt; sourceTree = "<group>"; };
 		C6D398B8281E5F6D00384F8E /* Extentions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extentions.swift; sourceTree = "<group>"; };
 		C6DF69692D7E51050098A845 /* ErrorTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorTextField.swift; sourceTree = "<group>"; };
@@ -148,6 +159,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		AAAAAAAA0000000000000002 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -167,6 +185,7 @@
 				C689E90326CC99C700DCE7BD /* macOS */,
 				C689E90D26CC99C700DCE7BD /* Tests iOS */,
 				C689E91826CC99C700DCE7BD /* Tests macOS */,
+				AAAAAAAA000000000000000D /* iCryptrTests */,
 				C6AE47472BB272F9004635D5 /* ThumbnailProvider */,
 				C6AE47442BB272F9004635D5 /* Frameworks */,
 				C689E8FB26CC99C700DCE7BD /* Products */,
@@ -193,6 +212,7 @@
 				C689E90226CC99C700DCE7BD /* iCryptr.app */,
 				C689E90A26CC99C700DCE7BD /* Tests iOS.xctest */,
 				C689E91526CC99C700DCE7BD /* Tests macOS.xctest */,
+				AAAAAAAA000000000000000B /* iCryptrTests.xctest */,
 				C6AE47432BB272F9004635D5 /* ThumbnailProvider.appex */,
 			);
 			name = Products;
@@ -232,6 +252,15 @@
 				C689E91B26CC99C700DCE7BD /* Info.plist */,
 			);
 			path = "Tests macOS";
+			sourceTree = "<group>";
+		};
+		AAAAAAAA000000000000000D /* iCryptrTests */ = {
+			isa = PBXGroup;
+			children = (
+				C6BD9D052FC74A6E009D0A41 /* StreamCryptorHMACTests.swift */,
+				AAAAAAAA000000000000000C /* Info.plist */,
+			);
+			path = iCryptrTests;
 			sourceTree = "<group>";
 		};
 		C689E93026CC9A0D00DCE7BD /* Services */ = {
@@ -365,6 +394,24 @@
 			productReference = C6AE47432BB272F9004635D5 /* ThumbnailProvider.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		AAAAAAAA0000000000000004 /* iCryptrTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AAAAAAAA0000000000000005 /* Build configuration list for PBXNativeTarget "iCryptrTests" */;
+			buildPhases = (
+				AAAAAAAA0000000000000001 /* Sources */,
+				AAAAAAAA0000000000000002 /* Frameworks */,
+				AAAAAAAA0000000000000003 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				AAAAAAAA0000000000000008 /* PBXTargetDependency */,
+			);
+			name = iCryptrTests;
+			productName = iCryptrTests;
+			productReference = AAAAAAAA000000000000000B /* iCryptrTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -392,6 +439,10 @@
 					C6AE47422BB272F9004635D5 = {
 						CreatedOnToolsVersion = 15.3;
 					};
+					AAAAAAAA0000000000000004 = {
+						CreatedOnToolsVersion = 16.0;
+						TestTargetID = C689E90126CC99C700DCE7BD;
+					};
 				};
 			};
 			buildConfigurationList = C689E8F126CC99C600DCE7BD /* Build configuration list for PBXProject "iCryptr" */;
@@ -411,6 +462,7 @@
 				C689E90126CC99C700DCE7BD /* iCryptr (macOS) */,
 				C689E90926CC99C700DCE7BD /* Tests iOS */,
 				C689E91426CC99C700DCE7BD /* Tests macOS */,
+				AAAAAAAA0000000000000004 /* iCryptrTests */,
 				C6AE47422BB272F9004635D5 /* ThumbnailProvider */,
 			);
 		};
@@ -449,6 +501,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		C6AE47412BB272F9004635D5 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AAAAAAAA0000000000000003 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -513,6 +572,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		AAAAAAAA0000000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AAAAAAAA000000000000000A /* StreamCryptorHMACTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		C6AE473F2BB272F9004635D5 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -538,6 +605,11 @@
 			isa = PBXTargetDependency;
 			target = C6AE47422BB272F9004635D5 /* ThumbnailProvider */;
 			targetProxy = C6AE474B2BB272F9004635D5 /* PBXContainerItemProxy */;
+		};
+		AAAAAAAA0000000000000008 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C689E90126CC99C700DCE7BD /* iCryptr (macOS) */;
+			targetProxy = AAAAAAAA0000000000000009 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -815,7 +887,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 11.3;
+				MACOSX_DEPLOYMENT_TARGET = 14.6;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.brendanlindsey.iCryptr.Tests-macOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
@@ -838,7 +910,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 11.3;
+				MACOSX_DEPLOYMENT_TARGET = 14.6;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.brendanlindsey.iCryptr.Tests-macOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
@@ -911,6 +983,54 @@
 			};
 			name = Release;
 		};
+		AAAAAAAA0000000000000006 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = Y6FW7TXMBT;
+				INFOPLIST_FILE = iCryptrTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.6;
+				PRODUCT_BUNDLE_IDENTIFIER = com.brendanlindsey.iCryptr.iCryptrTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/iCryptr.app/Contents/MacOS/iCryptr";
+			};
+			name = Debug;
+		};
+		AAAAAAAA0000000000000007 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = Y6FW7TXMBT;
+				INFOPLIST_FILE = iCryptrTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.6;
+				PRODUCT_BUNDLE_IDENTIFIER = com.brendanlindsey.iCryptr.iCryptrTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/iCryptr.app/Contents/MacOS/iCryptr";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -964,6 +1084,15 @@
 			buildConfigurations = (
 				C6AE474F2BB272F9004635D5 /* Debug */,
 				C6AE47502BB272F9004635D5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AAAAAAAA0000000000000005 /* Build configuration list for PBXNativeTarget "iCryptrTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AAAAAAAA0000000000000006 /* Debug */,
+				AAAAAAAA0000000000000007 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
